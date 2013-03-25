@@ -7,6 +7,7 @@ import java.nio.channels.FileChannel
 import java.nio.ByteBuffer
 
 /**
+ * BinarySource from a File using NIO.
  */
 final class FileBinarySource(inputFile: File) extends BinarySource {
 

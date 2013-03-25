@@ -22,9 +22,10 @@ object Resolvers {
 
 object Dependencies {
   val scalaz    = "org.scalaz"    %% "scalaz-core" % "6.0.4"
+  val scalaarm  = "com.jsuereth"  %% "scala-arm"   % "1.3"
   val scalatest = "org.scalatest" %% "scalatest"   % "1.9.1" % "test"
 
-  val projectDependencies = Seq(scalaz, scalatest)
+  val projectDependencies = Seq(scalaz, scalaarm, scalatest)
 }
 
 object Tasks {
