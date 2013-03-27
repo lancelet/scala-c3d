@@ -25,10 +25,14 @@ class BinarySourceSpec extends FunSpec {
       } {
         binarySource.getBytes(0, 512).fold(
           failure => fail("Did not read the header section as expected"),
-          iba => {
+          iba => { // iba = ImmutableByteArray
+            // Check for the correct size of the header section (512 bytes should have been read)
+            assert(iba.length === 512)
             // Check that the first two bytes of the file contain the correct magic numbers
             assert(iba.byteAt(0) === 0x02)
             assert(iba.byteAt(1) === 0x50)
+            // Check the last byte
+            assert(iba.byteAt(511) === 0x00)
           }
         )
       }
