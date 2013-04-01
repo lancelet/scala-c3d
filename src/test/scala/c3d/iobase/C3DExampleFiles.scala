@@ -17,6 +17,9 @@ object C3DExampleFiles {
 
   object Sample08 {
     def eb015pi: File = getAndRequireFileExists("resources/sample08/EB015PI.c3d")
+    def testbpi: File = getAndRequireFileExists("resources/sample08/TESTBPI.c3d")
+    def testcpi: File = getAndRequireFileExists("resources/sample08/TESTCPI.c3d")
+    def testdpi: File = getAndRequireFileExists("resources/sample08/TESTDPI.c3d")
   }
 
 }
