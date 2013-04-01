@@ -38,6 +38,14 @@ class BinarySourceSpec extends FunSpec {
       }
     }
 
+    it("should fail to read past the end of a file") {
+      for {
+        binarySource <- managed(BinarySource.fromFile(C3DExampleFiles.Sample08.eb015pi))
+      } {
+        assert(binarySource.getBytes(binarySource.length - 500, 512).isFailure)
+      }
+    }
+
   }
 
 }
