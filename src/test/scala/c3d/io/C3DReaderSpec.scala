@@ -2,6 +2,7 @@ package c3d.io
 
 import org.scalatest.FunSpec
 import scala.collection.immutable._
+import Util.b
 
 class C3DReaderSpec extends FunSpec with C3DFileSource {
 

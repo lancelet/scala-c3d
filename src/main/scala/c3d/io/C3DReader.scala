@@ -1,12 +1,10 @@
 package c3d.io
 
+import scala.collection.immutable._
 import scalaz.{Failure, Success, Validation}
+import Util.b
 
 object C3DReader {
-
-
-  /** Converts an `Integer` to a `Byte`. */
-  private [io] def b(i: Int): Byte = i.toByte
 
 
   /** Checks for a C3D file magic byte.

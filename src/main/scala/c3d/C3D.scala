@@ -16,6 +16,14 @@ trait Group {
   def parameters: Set[Parameter[_]]
 }
 
+trait ProcessorType
+object ProcessorType {
+  object Intel extends ProcessorType
+  object DEC extends ProcessorType
+  object SGIMIPS extends ProcessorType
+}
+
 trait C3D {
   def groups: Set[Group]
+  def processorType: ProcessorType = ProcessorType.Intel
 }
