@@ -10,7 +10,8 @@ object BuildSettings {
     name         := buildName,
     version      := buildVersion,
     scalaVersion := buildScalaVersion
-  )
+  ) ++ 
+  org.scalastyle.sbt.ScalastylePlugin.Settings
 }
 
 object Resolvers {
