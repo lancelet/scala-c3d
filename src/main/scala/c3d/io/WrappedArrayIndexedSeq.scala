@@ -2,12 +2,17 @@ package c3d.io
 
 import scala.collection.immutable._
 
-/** Wraps an Array[T] as an IndexedSeq[T].
+/** Wraps an `Array[T]` as an `IndexedSeq[T]`.
   * 
   * This is a utility class to enforce immutability of arrays.  It also implements a slice operation on construction,
   * so that slices are highly efficient.
   * 
-  * A wrap for a zero-length array may be constructed by setting from = until = 0.
+  * A wrap for a zero-length array may be constructed by setting `from` = `until` = 0.
+  * 
+  * @tparam T underlying type of the collection
+  * @param array wrapped array
+  * @param from array index corresponding to the zero index of the slice
+  * @param until array index that is one beyond the end of the slice
   */
 class WrappedArrayIndexedSeq[T](array: Array[T], from: Int, until: Int) extends IndexedSeq[T] {
 
