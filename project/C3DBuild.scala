@@ -22,7 +22,7 @@ object Resolvers {
 }
 
 object Dependencies {
-  val scalaz       = "org.scalaz"     %% "scalaz-core"   % "6.0.4"
+  val scalaz       = "org.scalaz"     %% "scalaz-core"   % "7.0.0"
   val scalaarm     = "com.jsuereth"   %% "scala-arm"     % "1.3"
   val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.M6-SNAP16" % "test"
 
