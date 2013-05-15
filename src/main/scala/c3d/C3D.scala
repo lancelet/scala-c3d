@@ -13,6 +13,7 @@ trait Parameter[T] {
 trait Group {
   def name: String
   def description: String
+  def isLocked: Boolean
   def parameters: Set[Parameter[_]]
 }
 

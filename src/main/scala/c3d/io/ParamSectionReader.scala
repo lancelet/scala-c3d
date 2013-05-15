@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable._
 import scala.math.abs
 import scalaz.{Failure, Success, Validation}
-import c3d.ProcessorType
+import c3d.{Group, ProcessorType}
 import Util.b
 
 private [io] object ParamSectionReader {
@@ -104,6 +104,27 @@ private [io] object ParamSectionReader {
     def groupId(block: FormattedByteIndexedSeq): Byte = block(1)
     def isGroup(block: FormattedByteIndexedSeq): Boolean = groupId(block) < 0
     blocks.partition(isGroup _)
+  }
+
+  /** Unassociated group, without any connected parameters.
+    * 
+    * This class passively reads group fields from a parameter section block.
+    * 
+    * @param block parameter section block
+    */
+  private [io] final class UnassociatedGroup(block: FormattedByteIndexedSeq) {
+    private val nName: Int = abs(block(0))
+    private val nDesc: Int = block(4 + nName)
+    def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
+    def description: String = block.slice(5 + nName, 5 + nName + nDesc).map(_.toChar).mkString
+    def id: Int = { assert(block(1) < 0); -block(1) }
+    def isLocked: Boolean = block(0) < 0
+
+    {
+      val lenExpected = nName + nDesc + 5
+      require(block.length == lenExpected, 
+        s"block was expected to be ${lenExpected} bytes long, but was ${block.length}")
+    }
   }
 
 }
