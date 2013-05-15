@@ -7,9 +7,10 @@ object BuildSettings {
   val buildScalaVersion = "2.10.1"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-    name         := buildName,
-    version      := buildVersion,
-    scalaVersion := buildScalaVersion
+    name          := buildName,
+    version       := buildVersion,
+    scalaVersion  := buildScalaVersion,
+    scalacOptions := Seq.empty[String]
   ) ++ 
   org.scalastyle.sbt.ScalastylePlugin.Settings
 }

@@ -20,6 +20,10 @@ class FormattedByteIndexedSeqSpec extends FunSpec {
     }
     def testfb: FormattedByteIndexedSeq = new FormattedByteIndexedSeq(testSeq, BinaryFormat.Intel)
 
+    it("should allow access to the correct BinaryFormat") {
+      assert(testfb.binaryFormat === BinaryFormat.Intel)
+    }
+
     it("should correctly read bytes") {
       assert(testfb(2) === b(0x14))
     }
