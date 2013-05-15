@@ -127,5 +127,32 @@ private [io] object ParamSectionReader {
     }
   }
 
+  /** Unassociated parameter, without a connected group and without typing information.
+    *
+    * This class passively reads parameter fields from a parameter section block.
+    * 
+    * @param block parameter section block
+    */
+  private [io] final class UntypedParameter[T](block: FormattedByteIndexedSeq) {
+    private def nName: Int = abs(block(0))
+    private def nDesc: Int = block(6 + nName + nDims + data.length)
+    private def descOfs: Int = 7 + nName + nDims + data.length
+    private def nElem: Int = abs(byteLengthPerElement)
+    private def nDims: Int = block(5 + nName)
+    def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
+    def description: String = block.slice(descOfs, descOfs + nDesc).map(_.toChar).mkString
+    def groupId: Int = { assert(block(1) > 0); block(1) }
+    def dimensions: IndexedSeq[Int] = new IndexedSeq[Int] {
+      def length: Int = nDims
+      def apply(idx: Int): Int = block(6 + nName + idx)
+    }
+    def byteLengthPerElement: Int = block(4 + nName)
+    def data: IndexedSeq[Byte] = new IndexedSeq[Byte] {
+      def length: Int = dimensions.product * nElem
+      def apply(idx: Int): Byte = block(6 + nName + nDims + idx)
+    }
+    def isLocked: Boolean = block(0) < 0
+  }
+
 }
 

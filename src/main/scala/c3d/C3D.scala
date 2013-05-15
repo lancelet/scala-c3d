@@ -5,6 +5,7 @@ import scala.collection.immutable._
 trait Parameter[T] {
   def name: String
   def description: String
+  def isLocked: Boolean
   def dimensions: IndexedSeq[Int]
   def data: IndexedSeq[T]
   def apply(idx: IndexedSeq[Int]): T

@@ -67,6 +67,30 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
       }
     }
 
+    it("should be able to construct unassociated, untyped parameters") {
+      C3DReader.paramSectionIndexedSeq(Sample08.EB015PI).map { ps: FormattedByteIndexedSeq =>
+        val testValidation = for {
+          gp: Seq[FormattedByteIndexedSeq] <- chunkGroupsAndParams(ps)
+          gsps = partitionToGroupsAndParams(gp)
+          groupBlocks = gsps._1
+          paramBlocks = gsps._2
+        } yield {
+          val params = paramBlocks.map(new UntypedParameter(_))
+          assert(params.length === 38)
+          val d = params(0)
+          assert(d.name === "DESCRIPTIONS")
+          assert(d.description === "  Point descriptions")
+          assert(d.groupId === 1)
+          assert(d.dimensions === IndexedSeq(32,20))
+          assert(d.byteLengthPerElement === -1)
+          assert(d.data.length === 32 * 20)
+          assert(d.data.slice(0, 13).map(_.toChar).mkString === "DIST/LAT FOOT")
+          assert(d.isLocked === false)
+        }
+        assert(testValidation.isSuccess)
+      }
+    }
+
   }
 
 }
