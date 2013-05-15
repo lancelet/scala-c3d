@@ -53,12 +53,11 @@ private [io] object ParamSectionReader {
     * This function splits the entire parameter section into a sequence of blocks, each of which represents
     * either a group or parameter.
     * 
-    * @param bf binaryformat used to read signed integers
-    * @param paramISeq `IndexedSeq[Byte]` corresponding to the parameter section
+    * @param paramISeq the parameter section bytes
     * @return sequence of blocks corresponding to either groups or parameters
     */
-  private [io] def chunkGroupsAndParams(bf: BinaryFormat)(paramISeq: IndexedSeq[Byte]): 
-      Validation[String, Seq[IndexedSeq[Byte]]] = 
+  private [io] def chunkGroupsAndParams(paramISeq: FormattedByteIndexedSeq): 
+      Validation[String, Seq[FormattedByteIndexedSeq]] =
   {
     /** Tail-recursive accumulator to collect blocks.
       * 
@@ -67,11 +66,11 @@ private [io] object ParamSectionReader {
       * @return accumulated sequence of blocks
       */
     @tailrec
-    def accum(blocks: Seq[IndexedSeq[Byte]], rem: IndexedSeq[Byte]): Seq[IndexedSeq[Byte]] = {
+    def accum(blocks: Seq[FormattedByteIndexedSeq], rem: FormattedByteIndexedSeq): Seq[FormattedByteIndexedSeq] = {
       val nCharsInName = abs(rem(0))
-      val offset = bf.bytesToUInt(rem(2+nCharsInName), rem(3+nCharsInName))
+      val offset = rem.uintAt(2 + nCharsInName)
       val byteOffset = offset + 2 + nCharsInName
-      if (byteOffset == 0)
+      if (offset == 0)
         blocks :+ rem.slice(0, rem.length)
       else
         accum(blocks :+ rem.slice(0, byteOffset), rem.slice(byteOffset, rem.length))
@@ -80,7 +79,7 @@ private [io] object ParamSectionReader {
     // Here we try to apply the accumulator.  Any failures are likely to be IndexOutOfBoundsExceptions,
     //  which indicate invalid offsets within the parameter section.
     try {
-      Success(accum(Seq.empty[IndexedSeq[Byte]], paramISeq.slice(4, paramISeq.length)))
+      Success(accum(Seq.empty[FormattedByteIndexedSeq], paramISeq.slice(4, paramISeq.length)))
     } catch {
       case ioe: IndexOutOfBoundsException =>
         Failure("could not chunk groups and parameters (probably an invalid offset)")
