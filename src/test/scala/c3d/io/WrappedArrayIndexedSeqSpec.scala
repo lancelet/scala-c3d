@@ -52,7 +52,7 @@ class WrappedArrayIndexedSeqSpec extends FunSpec {
     it("should fail to construct if from or until are invalid") {
       val array = Array(1, 2, 3)
       intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array, -1, 3) }  // from < 0
-      intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  3, 3) }  // from >= length
+      intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  4, 3) }  // from > length
       intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  2, 1) }  // until <= from
       intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  1, 4) }  // until > length
     }

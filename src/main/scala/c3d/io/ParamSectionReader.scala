@@ -3,8 +3,10 @@ package c3d.io
 import scala.annotation.tailrec
 import scala.collection.immutable._
 import scala.math.abs
+import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
-import c3d.{Group, ProcessorType}
+import scalaz.std.AllInstances._
+import c3d.{Group, Parameter, ProcessorType}
 import Util.b
 
 private [io] object ParamSectionReader {
@@ -68,12 +70,17 @@ private [io] object ParamSectionReader {
     @tailrec
     def accum(blocks: Seq[FormattedByteIndexedSeq], rem: FormattedByteIndexedSeq): Seq[FormattedByteIndexedSeq] = {
       val nCharsInName = abs(rem(0))
+      val groupId = rem(1)
       val offset = rem.uintAt(2 + nCharsInName)
       val byteOffset = offset + 2 + nCharsInName
-      if (offset == 0)
-        blocks :+ rem.slice(0, rem.length)
-      else
+      if (offset == 0) {
+        if (groupId == 0)
+          blocks
+        else
+          blocks :+ rem.slice(0, rem.length)
+      } else {
         accum(blocks :+ rem.slice(0, byteOffset), rem.slice(byteOffset, rem.length))
+      }
     }
 
     // Here we try to apply the accumulator.  Any failures are likely to be IndexOutOfBoundsExceptions,
@@ -127,13 +134,14 @@ private [io] object ParamSectionReader {
     }
   }
 
-  /** Unassociated parameter, without a connected group and without typing information.
+  /** Untyped parameter, without a connected group.
     *
-    * This class passively reads parameter fields from a parameter section block.
+    * This class passively reads parameter fields from a parameter section block.  It views all
+    * of the data that it contains as an `IndexedSeq` of bytes.
     * 
     * @param block parameter section block
     */
-  private [io] final class UntypedParameter[T](block: FormattedByteIndexedSeq) {
+  private [io] final class UntypedParameter(val block: FormattedByteIndexedSeq) {
     private def nName: Int = abs(block(0))
     private def nDesc: Int = block(6 + nName + nDims + data.length)
     private def descOfs: Int = 7 + nName + nDims + data.length
@@ -152,6 +160,101 @@ private [io] object ParamSectionReader {
       def apply(idx: Int): Byte = block(6 + nName + nDims + idx)
     }
     def isLocked: Boolean = block(0) < 0
+    def asUnassociatedParameter: UnassociatedParameter[_] = {
+      byteLengthPerElement match {
+        case -1 => new UnassociatedParameter[Char](this)
+        case  1 => new UnassociatedParameter[Byte](this)
+        case  2 => new UnassociatedParameter[Int](this)
+        case  4 => new UnassociatedParameter[Float](this)
+      }
+    }
+  }
+
+  /** Unassociated parameter, without a connected group, but with typing information.
+    * 
+    * This class passively reads parameter fields from a parameter section block.  Instances should be
+    * created by calling [[UntypedParameter#asUnassociatedParameter]].
+    *
+    * @param uParam untyped parameter
+    */
+  private [io] final class UnassociatedParameter[T](uParam: UntypedParameter)(implicit ev: TypeTag[T]) {
+    def name: String = uParam.name
+    def description: String = uParam.description
+    def groupId: Int = uParam.groupId
+    def dimensions: IndexedSeq[Int] = uParam.dimensions
+    def dataType: Type = typeOf[T]  // eg: dataType == typeOf[Char]
+    def data: IndexedSeq[T] = new IndexedSeq[T] {
+      val length: Int = uParam.data.length / abs(uParam.byteLengthPerElement)
+      def apply(idx: Int): T = typeOf[T] match {
+        case t if t =:= typeOf[Char]  => uParam.data(idx).toChar.asInstanceOf[T]
+        case t if t =:= typeOf[Byte]  => uParam.data(idx).asInstanceOf[T]
+        case t if t =:= typeOf[Int]   => {
+          val i0 = 2 * idx
+          uParam.block.binaryFormat.bytesToInt(uParam.data(i0), uParam.data(i0+1)).asInstanceOf[T]
+        }
+        case t if t =:= typeOf[Float] => {
+          val i0 = 4 * idx
+          uParam.block.binaryFormat.bytesToFloat(
+            uParam.data(i0), uParam.data(i0+1), uParam.data(i0+2), uParam.data(i0+3)
+          ).asInstanceOf[T]
+        }
+      }
+    }
+    def isLocked: Boolean = uParam.isLocked
+
+    // check that the number of bytes per element matches the expected values
+    {
+      val expectedByteLengthPerElement: Int = typeOf[T] match {
+        case t if t =:= typeOf[Char]  => -1
+        case t if t =:= typeOf[Byte]  =>  1
+        case t if t =:= typeOf[Int]   =>  2
+        case t if t =:= typeOf[Float] =>  4
+      }
+      require(expectedByteLengthPerElement == uParam.byteLengthPerElement,
+        s"expected ${expectedByteLengthPerElement} bytes per element, but found ${uParam.byteLengthPerElement}")
+      require(uParam.data.length % uParam.byteLengthPerElement == 0,
+        "length of data is not an even multiple of the number of bytes per element")
+    }
+  }
+
+  /** Concrete case-class implementation of a C3D Group. */
+  private [io] final case class ReadGroup(
+    name: String, description: String, isLocked: Boolean, parameters: Set[Parameter[_]]
+  ) extends Group
+
+  /** Concrete case-class implementation of a C3D Parameter. */
+  private [io] final case class ReadParameter[T](
+    name: String, description: String, isLocked: Boolean, dimensions: IndexedSeq[Int], data: IndexedSeq[T]
+  ) extends Parameter[T] {
+    def apply(idx: IndexedSeq[Int]): T = ???
+  }
+
+  /** Reads in the entire parameter section.
+    * 
+    * @param paramISeq indexed sequence corresponding to the entire parameter section
+    * @return `Set[Group]` corresponding to the groups, containing parameters
+    */
+  private [io] def read(paramISeq: FormattedByteIndexedSeq): Validation[String, Set[Group]] = {
+    try {
+      for {
+        (groupBlocks, paramBlocks) <- chunkGroupsAndParams(paramISeq).map(partitionToGroupsAndParams _)
+      } yield {
+        // construct unassociated groups and parameters (not connected to each other yet)
+        val uGroups = groupBlocks.map(new UnassociatedGroup(_))
+        val uParams = paramBlocks.map(new UntypedParameter(_).asUnassociatedParameter)
+
+        // for each group, collect its associated parameters and build fully-nested structures
+        val groupSeq: Seq[Group] = for (g <- uGroups) yield {
+          val paramSeq: Seq[Parameter[_]] = for (p <- uParams if (p.groupId == g.id)) yield
+            ReadParameter(p.name, p.description, p.isLocked, p.dimensions, p.data)
+          ReadGroup(g.name, g.description, g.isLocked, paramSeq.toSet)
+        }
+        groupSeq.toSet
+      }
+    } catch {
+      case ioe: IndexOutOfBoundsException =>
+        Failure("a problem was encountered reading the parameter section")
+    }
   }
 
 }
