@@ -18,8 +18,10 @@ class WrappedArrayIndexedSeq[T](array: Array[T], from: Int, until: Int) extends 
 
   {
     val maxFrom = if (array.length > 0) array.length else 1  // case where array.length == 0
-    require(from  >= 0    && from  <  maxFrom,      s"from must satisfy: 0 <= from < ${maxFrom}")
-    require(until >= from && until <= array.length, s"until must satisfy: from <= until <= ${array.length}")
+    require(from  >= 0    && from  <  maxFrom,
+      s"from must satisfy: 0 <= from < ${maxFrom}: from=${from}")
+    require(until >= from && until <= array.length,
+      s"until must satisfy: from <= until <= ${array.length}: from=${from}, until=${until}")
   }
 
   def length: Int = until - from
@@ -31,6 +33,15 @@ class WrappedArrayIndexedSeq[T](array: Array[T], from: Int, until: Int) extends 
       throw new IndexOutOfBoundsException(s"Index must be in the range: 0 <= index < ${length}")
   }
 
-  override def slice(from: Int, until: Int) = new WrappedArrayIndexedSeq(array, from, until)
+  override def slice(relFrom: Int, relUntil: Int) = {
+    {
+      val maxFrom = if (length > 0) length else 1
+      require(relFrom  >= 0       && relFrom  <  maxFrom, 
+        s"relFrom must satisfy: 0 <= relFrom < ${maxFrom}: relFrom=${relFrom}")
+      require(relUntil >= relFrom && relUntil <= length,  
+        s"relUntil must satisfy: relFrom <= relUntil <= ${length}: relFrom=${relFrom}, relUntil=${relUntil}")
+    }
+    new WrappedArrayIndexedSeq(array, from + relFrom, from + relUntil)
+  }
 
 }

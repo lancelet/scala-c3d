@@ -43,6 +43,12 @@ class WrappedArrayIndexedSeqSpec extends FunSpec {
       assert(w00.length === 0)
     }
 
+    it("should be able to slice twice") {
+      val w2 = wrap123.slice(1, 3).slice(1, 2)
+      assert(w2.length === 1)
+      assert(w2(0) === 3)
+    }
+
     it("should fail to construct if from or until are invalid") {
       val array = Array(1, 2, 3)
       intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array, -1, 3) }  // from < 0
