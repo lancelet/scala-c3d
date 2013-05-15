@@ -86,5 +86,25 @@ private [io] object ParamSectionReader {
     }
   }
 
+
+  /** Partitions parameter section blocks into a sequence of groups and sequence of parameters.
+    *
+    * Given a sequence of blocks from the parameter section, this method splits them into two sequences: one
+    * containing only groups and one containing only parameters.
+    * 
+    * Groups are identified by their having a negative group number (byte 1), while parameters have a 
+    * positive group number.
+    * 
+    * @param blocks sequence of generic blocks (either groups OR parameters)
+    * @return (groups, parameters)
+    */
+  private [io] def partitionToGroupsAndParams(blocks: Seq[FormattedByteIndexedSeq]): 
+      (Seq[FormattedByteIndexedSeq], Seq[FormattedByteIndexedSeq]) = 
+  {
+    def groupId(block: FormattedByteIndexedSeq): Byte = block(1)
+    def isGroup(block: FormattedByteIndexedSeq): Boolean = groupId(block) < 0
+    blocks.partition(isGroup _)
+  }
+
 }
 

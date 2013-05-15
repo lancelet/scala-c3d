@@ -24,11 +24,23 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     it("should chunk the parameter section correctly into groups and parameters") {
       C3DReader.paramSectionIndexedSeq(Sample08.EB015PI).map { ps: FormattedByteIndexedSeq =>
         for {
-          pt: ProcessorType <- processorType(ps)
-          bf: BinaryFormat = BinaryFormat.fromProcessorType(pt)
-          gp: Seq[IndexedSeq[Byte]] <- chunkGroupsAndParams(ps)
+          gp: Seq[FormattedByteIndexedSeq] <- chunkGroupsAndParams(ps)
         } {
           assert(gp.length === 43)
+        }
+      }
+    }
+
+    it("should be able to partition groups and parameters") {
+      C3DReader.paramSectionIndexedSeq(Sample08.EB015PI).map { ps: FormattedByteIndexedSeq =>
+        for {
+          gp: Seq[FormattedByteIndexedSeq] <- chunkGroupsAndParams(ps)
+          gsps: (Seq[FormattedByteIndexedSeq], Seq[FormattedByteIndexedSeq]) = partitionToGroupsAndParams(gp)
+          gs = gsps._1
+          ps = gsps._2
+        } {
+          assert(gs.length === 5)
+          assert(ps.length === 38)
         }
       }
     }
