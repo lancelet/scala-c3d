@@ -9,6 +9,7 @@ trait Parameter[T] {
   def isLocked: Boolean
   def dimensions: IndexedSeq[Int]
   def data: IndexedSeq[T]
+  /** Column-major access. */
   def apply(idx: IndexedSeq[Int]): T
   def parameterType: Type
 }
