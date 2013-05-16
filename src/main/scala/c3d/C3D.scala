@@ -28,4 +28,5 @@ object ProcessorType {
 trait C3D {
   def groups: Set[Group]
   def processorType: ProcessorType = ProcessorType.Intel
+  def getParameter[T](group: String, parameter: String): Option[Parameter[T]]
 }

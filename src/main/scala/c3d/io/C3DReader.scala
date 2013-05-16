@@ -1,11 +1,12 @@
 package c3d.io
 
+import c3d.{C3D, Group, Parameter, ProcessorType}
 import scala.collection.immutable._
 import scalaz.{Failure, Success, Validation}
+import scalaz.std.AllInstances._
 import Util.b
 
 object C3DReader {
-
 
   /** Checks for a C3D file magic byte.
     * 
@@ -16,7 +17,6 @@ object C3DReader {
     * @return true if the magic byte is present
     */
   private [io] def hasMagicByte(c3dISeq: IndexedSeq[Byte]): Boolean = (c3dISeq.length >= 2) && (c3dISeq(1) == b(0x50))
-
 
   /** Returns the `FormattedByteIndexedSeq` containing the parameter section.
     * 
@@ -48,6 +48,31 @@ object C3DReader {
       //  pointers happen to be corrupted.
       case ex @ (_:IndexOutOfBoundsException | _:SliceException) => 
         Failure("could not return the portion of the file corresponding to the parameter section")
+    }
+  }
+
+  /** Concrete case-class implementation of a C3D top-level object. */
+  private [io] final case class ReadC3D(groups: Set[Group], override val processorType: ProcessorType) extends C3D {
+    def getParameter[T](group: String, parameter: String): Option[Parameter[T]] = ???
+  }
+
+  /** Reads a C3D file from an `IndexedSeq[Byte]`.
+    * 
+    * @param c3dISeq `IndexedSeq[Byte]` representing the entire C3D file.
+    * @return the C3D file that has been read
+    */
+  def read(c3dISeq: IndexedSeq[Byte]): Validation[String, C3D] = {
+    // read groups and parameters (the parameter section)
+    val paramSecISeqV = paramSectionIndexedSeq(c3dISeq)
+    val processorTypeV = paramSecISeqV flatMap { ParamSectionReader.processorType _ }
+    val groupsV = paramSecISeqV flatMap { ParamSectionReader.read _ }
+
+    // assemble the C3D object
+    for {
+      groups: Set[Group] <- groupsV
+      processorType: ProcessorType <- processorTypeV
+    } yield {
+      ReadC3D(groups, processorType)
     }
   }
 
