@@ -35,7 +35,7 @@ object FileUtils {
         }
       } map { _ =>
         dataInputStream.close()
-        new WrappedArrayIndexedSeq(byteArray, 0, byteArray.length)
+        WrappedArrayIndexedSeq(byteArray)
       }
     }
   }

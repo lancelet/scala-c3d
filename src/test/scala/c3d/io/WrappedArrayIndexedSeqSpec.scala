@@ -6,7 +6,7 @@ class WrappedArrayIndexedSeqSpec extends FunSpec {
 
   private def wrap123: WrappedArrayIndexedSeq[Int] = {
     val array = Array[Int](1, 2, 3)
-    new WrappedArrayIndexedSeq[Int](array, 0, array.length)
+    WrappedArrayIndexedSeq[Int](array)
   }
 
   describe("A WrappedArrayIndexedSeq") {
@@ -51,15 +51,15 @@ class WrappedArrayIndexedSeqSpec extends FunSpec {
 
     it("should fail to construct if from or until are invalid") {
       val array = Array(1, 2, 3)
-      intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array, -1, 3) }  // from < 0
-      intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  4, 3) }  // from > length
-      intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  2, 1) }  // until <= from
-      intercept[IllegalArgumentException] { new WrappedArrayIndexedSeq(array,  1, 4) }  // until > length
+      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array, -1, 3) }  // from < 0
+      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array,  4, 3) }  // from > length
+      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array,  2, 1) }  // until <= from
+      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array,  1, 4) }  // until > length
     }
 
     it("should construct even if array.length == 0") {
       val array = Array.empty[Int]
-      val wrap = new WrappedArrayIndexedSeq(array, 0, 0)
+      val wrap = WrappedArrayIndexedSeq(array, 0, 0)
       assert(wrap.length === 0)
     }
 
