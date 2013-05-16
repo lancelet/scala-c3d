@@ -2,6 +2,7 @@ package c3d
 
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
+import scalaz.Validation
 
 trait Parameter[T] {
   def name: String
@@ -32,4 +33,8 @@ trait C3D {
   def groups: Set[Group]
   def processorType: ProcessorType = ProcessorType.Intel
   def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]]
+}
+
+object C3D {
+  def read(c3dISeq: IndexedSeq[Byte]): Validation[String, C3D] = c3d.io.C3DReader.read(c3dISeq)
 }

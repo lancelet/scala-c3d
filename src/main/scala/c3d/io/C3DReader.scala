@@ -1,6 +1,6 @@
 package c3d.io
 
-import c3d.{C3D, Group, Parameter, ProcessorType}
+import c3d.{C3D, Group, Parameter, ProcessorType, StringParameter}
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
@@ -61,10 +61,18 @@ object C3DReader {
       } flatMap { g: Group => // find the named parameter
         g.parameters.find(_.name.toUpperCase == parameter.toUpperCase)
       } flatMap { p: Parameter[_] => // check that the parameter type conforms with that expected
-        if (p.parameterType == typeOf[T])
-          Some(p.asInstanceOf[Parameter[T]])
-        else
+        // handle string parameters by searching for a Parameter[Char] first
+        val expectedType: Type = if (typeOf[T] == typeOf[String]) typeOf[Char] else typeOf[T]
+        if (p.parameterType == expectedType) {
+          if (typeOf[T] == typeOf[String]) {  // special handling for strings
+            val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
+            Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
+          } else {
+            Some(p.asInstanceOf[Parameter[T]])
+          }
+        } else {
           None
+        }
       }
     }
 

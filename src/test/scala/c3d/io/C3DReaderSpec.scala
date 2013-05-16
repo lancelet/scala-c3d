@@ -91,6 +91,15 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
       assert(pl(IndexedSeq(1, 37)) === 'S')
     }
 
+    it("should read string parameters") {
+      val c3d = C3DReader.read(Sample08.EB015PI).getOrElse(fail())
+      // should fail on non-String parameters
+      assert(c3d.getParameter[String]("POINT", "DATA_START").isEmpty)
+      // should succeed on string parameters
+      val pd = c3d.getParameter[String]("POINT", "DESCRIPTIONS").getOrElse(fail())
+      assert(pd(IndexedSeq(1)).trim === "INSTEP")
+    }
+
   }
 
 }
