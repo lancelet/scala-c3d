@@ -2,6 +2,7 @@ package c3d.io
 
 import c3d.{C3D, Group, Parameter, ProcessorType}
 import scala.collection.immutable._
+import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
 import scalaz.std.AllInstances._
 import Util.b
@@ -53,7 +54,20 @@ object C3DReader {
 
   /** Concrete case-class implementation of a C3D top-level object. */
   private [io] final case class ReadC3D(groups: Set[Group], override val processorType: ProcessorType) extends C3D {
-    def getParameter[T](group: String, parameter: String): Option[Parameter[T]] = ???
+
+    def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]] = {
+      groups.find { // find the named group
+        _.name.toUpperCase == group.toUpperCase
+      } flatMap { g: Group => // find the named parameter
+        g.parameters.find(_.name.toUpperCase == parameter.toUpperCase)
+      } flatMap { p: Parameter[_] => // check that the parameter type conforms with that expected
+        if (p.parameterType == typeOf[T])
+          Some(p.asInstanceOf[Parameter[T]])
+        else
+          None
+      }
+    }
+
   }
 
   /** Reads a C3D file from an `IndexedSeq[Byte]`.

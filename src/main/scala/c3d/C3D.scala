@@ -1,6 +1,7 @@
 package c3d
 
 import scala.collection.immutable._
+import scala.reflect.runtime.universe._
 
 trait Parameter[T] {
   def name: String
@@ -9,6 +10,7 @@ trait Parameter[T] {
   def dimensions: IndexedSeq[Int]
   def data: IndexedSeq[T]
   def apply(idx: IndexedSeq[Int]): T
+  def parameterType: Type
 }
 
 trait Group {
@@ -28,5 +30,5 @@ object ProcessorType {
 trait C3D {
   def groups: Set[Group]
   def processorType: ProcessorType = ProcessorType.Intel
-  def getParameter[T](group: String, parameter: String): Option[Parameter[T]]
+  def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]]
 }

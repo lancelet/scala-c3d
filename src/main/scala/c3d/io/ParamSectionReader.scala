@@ -182,7 +182,7 @@ private [io] object ParamSectionReader {
     def description: String = uParam.description
     def groupId: Int = uParam.groupId
     def dimensions: IndexedSeq[Int] = uParam.dimensions
-    def dataType: Type = typeOf[T]  // eg: dataType == typeOf[Char]
+    def parameterType: Type = typeOf[T]  // eg: parameterType == typeOf[Char]
     def data: IndexedSeq[T] = new IndexedSeq[T] {
       val length: Int = uParam.data.length / abs(uParam.byteLengthPerElement)
       def apply(idx: Int): T = typeOf[T] match {
@@ -224,7 +224,8 @@ private [io] object ParamSectionReader {
 
   /** Concrete case-class implementation of a C3D Parameter. */
   private [io] final case class ReadParameter[T](
-    name: String, description: String, isLocked: Boolean, dimensions: IndexedSeq[Int], data: IndexedSeq[T]
+    name: String, description: String, isLocked: Boolean, dimensions: IndexedSeq[Int], data: IndexedSeq[T],
+    parameterType: Type
   ) extends Parameter[T] {
     def apply(idx: IndexedSeq[Int]): T = ???
   }
@@ -251,7 +252,8 @@ private [io] object ParamSectionReader {
           val paramSeq: Seq[Parameter[_]] = for (p <- uParams if (p.groupId == g.id)) yield
             ReadParameter(p.name, p.description, p.isLocked, 
               WrappedArrayIndexedSeq(p.dimensions.toArray), 
-              WrappedArrayIndexedSeq(p.data.toArray))
+              WrappedArrayIndexedSeq(p.data.toArray),
+              p.parameterType)
           ReadGroup(g.name, g.description, g.isLocked, paramSeq.toSet)
         }
         groupSeq.toSet

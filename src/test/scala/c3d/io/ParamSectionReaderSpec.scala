@@ -102,7 +102,7 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
           val params = paramBlocks.map(new UntypedParameter(_).asUnassociatedParameter)
           assert(params.length === 37)
           val d = params(0).asInstanceOf[UnassociatedParameter[Char]]
-          assert(d.dataType === typeOf[Char])
+          assert(d.parameterType === typeOf[Char])
           assert(d.name === "DESCRIPTIONS")
           assert(d.description === "  Point descriptions")
           assert(d.groupId === 1)
