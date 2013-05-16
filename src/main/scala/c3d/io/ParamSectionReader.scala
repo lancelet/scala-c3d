@@ -244,9 +244,14 @@ private [io] object ParamSectionReader {
         val uParams = paramBlocks.map(new UntypedParameter(_).asUnassociatedParameter)
 
         // for each group, collect its associated parameters and build fully-nested structures
+        // when constructing ReadParameter, we take `dimensions` and `data`, and convert them to
+        //  wrapped arrays.  this removes any dependence upon the original WrappedArrayIndexedSeq
+        //  for the entire parameter block, getting rid of a possible memory leak.
         val groupSeq: Seq[Group] = for (g <- uGroups) yield {
           val paramSeq: Seq[Parameter[_]] = for (p <- uParams if (p.groupId == g.id)) yield
-            ReadParameter(p.name, p.description, p.isLocked, p.dimensions, p.data)
+            ReadParameter(p.name, p.description, p.isLocked, 
+              WrappedArrayIndexedSeq(p.dimensions.toArray), 
+              WrappedArrayIndexedSeq(p.data.toArray))
           ReadGroup(g.name, g.description, g.isLocked, paramSeq.toSet)
         }
         groupSeq.toSet
