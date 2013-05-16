@@ -4,6 +4,7 @@ import c3d.C3D
 import org.scalatest.FunSpec
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
+import scalaz.std.AllInstances._
 import Util.b
 
 class C3DReaderSpec extends FunSpec with C3DFileSource {
@@ -72,6 +73,22 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
           assert(xScreen.parameterType === typeOf[Char])
         }
       }
+    }
+
+    it("should index multi-dimensional parameters correctly") {
+      val c3dV = C3DReader.read(Sample08.EB015PI)
+      val pl = c3dV.getOrElse(fail()).getParameter[Char]("POINT", "LABELS").getOrElse(fail())
+      // check for an error if the sequence is the wrong size
+      intercept[IllegalArgumentException] { pl(IndexedSeq(0, 0, 0)) }
+      intercept[IllegalArgumentException] { pl(IndexedSeq(0)) }
+      // first line
+      assert(pl(IndexedSeq(0, 0)) === 'R')
+      assert(pl(IndexedSeq(1, 0)) === 'F')
+      assert(pl(IndexedSeq(2, 0)) === 'T')
+      assert(pl(IndexedSeq(3, 0)) === '1')
+      // last line
+      assert(pl(IndexedSeq(0, 37)) === 'L')
+      assert(pl(IndexedSeq(1, 37)) === 'S')
     }
 
   }

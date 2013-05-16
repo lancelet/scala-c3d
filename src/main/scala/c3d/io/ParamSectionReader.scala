@@ -219,15 +219,29 @@ private [io] object ParamSectionReader {
 
   /** Concrete case-class implementation of a C3D Group. */
   private [io] final case class ReadGroup(
-    name: String, description: String, isLocked: Boolean, parameters: Set[Parameter[_]]
+    name:        String, 
+    description: String, 
+    isLocked:    Boolean, 
+    parameters:  Set[Parameter[_]]
   ) extends Group
 
   /** Concrete case-class implementation of a C3D Parameter. */
   private [io] final case class ReadParameter[T](
-    name: String, description: String, isLocked: Boolean, dimensions: IndexedSeq[Int], data: IndexedSeq[T],
+    name:          String, 
+    description:   String, 
+    isLocked:      Boolean, 
+    dimensions:    IndexedSeq[Int], 
+    data:          IndexedSeq[T],
     parameterType: Type
   ) extends Parameter[T] {
-    def apply(idx: IndexedSeq[Int]): T = ???
+
+    def apply(idx: IndexedSeq[Int]): T = {
+      require(idx.length == dimensions.length, "index must match data dimensions")
+      val coeff = dimensions.scanLeft(1)(_ * _)  // cumulative product
+      val flatIndex = (for ((i, d) <- idx zip coeff) yield i * d).sum
+      data(flatIndex)
+    }
+
   }
 
   /** Reads in the entire parameter section.
