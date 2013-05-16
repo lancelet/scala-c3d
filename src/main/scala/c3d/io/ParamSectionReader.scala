@@ -69,12 +69,12 @@ private [io] object ParamSectionReader {
       */
     @tailrec
     def accum(blocks: Seq[FormattedByteIndexedSeq], rem: FormattedByteIndexedSeq): Seq[FormattedByteIndexedSeq] = {
-      val nCharsInName = abs(rem(0))
-      val groupId = rem(1)
-      val offset = rem.uintAt(2 + nCharsInName)
-      val byteOffset = offset + 2 + nCharsInName
-      if (offset == 0) {
-        if (groupId == 0)
+      val nCharsInName = abs(rem(0))              // # of characters in the name
+      val groupId = rem(1)                        // ID of the group (or the group to which a parameter belongs)
+      val offset = rem.uintAt(2 + nCharsInName)   // offset to the start of the next block (relative to its own index)
+      val byteOffset = offset + 2 + nCharsInName  // offset to the next block (relative to current block)
+      if (offset == 0) {   // if the offset to the next block is zero, we terminate...
+        if (groupId == 0)  // if the groupId of the current block is zero then we don't add the current block
           blocks
         else
           blocks :+ rem.slice(0, rem.length)
@@ -88,7 +88,7 @@ private [io] object ParamSectionReader {
     try {
       Success(accum(Seq.empty[FormattedByteIndexedSeq], paramISeq.slice(4, paramISeq.length)))
     } catch {
-      case ioe: IndexOutOfBoundsException =>
+      case ex @ (_:IndexOutOfBoundsException | _:SliceException) =>
         Failure("could not chunk groups and parameters (probably an invalid offset)")
     }
   }
@@ -252,7 +252,7 @@ private [io] object ParamSectionReader {
         groupSeq.toSet
       }
     } catch {
-      case ioe: IndexOutOfBoundsException =>
+      case ex @ (_:IndexOutOfBoundsException | _:SliceException) =>
         Failure("a problem was encountered reading the parameter section")
     }
   }

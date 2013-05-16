@@ -46,7 +46,7 @@ object C3DReader {
     } catch {
       // most probable failure is an attempt to access indices outside of the bounds of the file, if any of the
       //  pointers happen to be corrupted.
-      case iob: IndexOutOfBoundsException => 
+      case ex @ (_:IndexOutOfBoundsException | _:SliceException) => 
         Failure("could not return the portion of the file corresponding to the parameter section")
     }
   }

@@ -24,10 +24,8 @@ private [io] final class WrappedArrayIndexedSeq[T] private (array: Array[T], fro
   // this block performs checking of `from` and `until` against the original array
   {
     val maxFrom = if (array.length > 0) array.length else 1  // case where array.length == 0
-    require(from  >= 0    && from  <= maxFrom,
-      s"from must satisfy: 0 <= from < ${maxFrom}: from=${from}")
-    require(until >= from && until <= array.length,
-      s"until must satisfy: from <= until <= ${array.length}: from=${from}, until=${until}")
+    if ((from < 0) || (from > maxFrom) || (until < from) || (until > array.length))
+      throw new SliceException(0, maxFrom, from, until)
   }
 
   val length: Int = until - from
@@ -43,10 +41,8 @@ private [io] final class WrappedArrayIndexedSeq[T] private (array: Array[T], fro
     // this block performs checking of `relFrom` and `relUntil` against the current `WrappedArrayIndexedSeq`
     {
       val maxFrom = if (length > 0) length else 1   // case where length == 0
-      require(relFrom  >= 0       && relFrom  <= maxFrom, 
-        s"relFrom must satisfy: 0 <= relFrom < ${maxFrom}: relFrom=${relFrom}")
-      require(relUntil >= relFrom && relUntil <= length,  
-        s"relUntil must satisfy: relFrom <= relUntil <= ${length}: relFrom=${relFrom}, relUntil=${relUntil}")
+      if ((relFrom < 0) || (relFrom > maxFrom) || (relUntil < relFrom) || (relUntil > length))
+        throw new SliceException(0, maxFrom, relFrom, relUntil)
     }
     new WrappedArrayIndexedSeq(array, from + relFrom, from + relUntil)
   }

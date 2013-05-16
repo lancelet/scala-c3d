@@ -51,10 +51,10 @@ class WrappedArrayIndexedSeqSpec extends FunSpec {
 
     it("should fail to construct if from or until are invalid") {
       val array = Array(1, 2, 3)
-      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array, -1, 3) }  // from < 0
-      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array,  4, 3) }  // from > length
-      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array,  2, 1) }  // until <= from
-      intercept[IllegalArgumentException] { WrappedArrayIndexedSeq(array,  1, 4) }  // until > length
+      intercept[SliceException] { WrappedArrayIndexedSeq(array, -1, 3) }  // from < 0
+      intercept[SliceException] { WrappedArrayIndexedSeq(array,  4, 3) }  // from > length
+      intercept[SliceException] { WrappedArrayIndexedSeq(array,  2, 1) }  // until <= from
+      intercept[SliceException] { WrappedArrayIndexedSeq(array,  1, 4) }  // until > length
     }
 
     it("should construct even if array.length == 0") {
