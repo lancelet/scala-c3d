@@ -1,10 +1,5 @@
-.idea
-.idea_modules
-project/target
-resources
-target
-.project
-.classpath
-.ensime_lucene
 .ensime
-.cache
+.ensime_lucene
+c3d.org-example-files
+project/target
+target
