@@ -1,6 +1,6 @@
 package c3d.io
 
-import c3d.{C3D, Group, Parameter, ProcessorType, StringParameter}
+import c3d.{C3D, Group, Parameter, ProcessorType}
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}

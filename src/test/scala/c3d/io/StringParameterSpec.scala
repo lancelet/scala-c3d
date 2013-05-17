@@ -1,9 +1,9 @@
-package c3d
+package c3d.io
 
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import org.scalatest.FunSpec
-import c3d.io.C3DFileSource
+import c3d.C3D
 
 class StringParameterSpec extends FunSpec with C3DFileSource {
 

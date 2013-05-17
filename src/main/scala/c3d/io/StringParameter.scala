@@ -1,7 +1,8 @@
-package c3d
+package c3d.io
 
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
+import c3d.Parameter
 
 /** Converts a [[Parameter[Char]]] to a [[Parameter[String]]].
   * 
