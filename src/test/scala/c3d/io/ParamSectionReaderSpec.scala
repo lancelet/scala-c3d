@@ -125,19 +125,19 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
             find(_.name == name).get.asInstanceOf[Parameter[T]]
           assert(groups.size === 5)
           // check the names of all groups
-          assert(groups.map(_.name) === Set("POINT", "ANALOG", "FORCE_PLATFORM", "FPLOC", "SUBJECT"))
+          assert(groups.map(_.name) === Seq("POINT", "ANALOG", "FORCE_PLATFORM", "FPLOC", "SUBJECT"))
           // check the names of parameters belonging to all groups
           assert(get("POINT").parameters.map(_.name) ===
-            Set("DESCRIPTIONS", "X_SCREEN", "Y_SCREEN", "LABELS", "UNITS", "USED", "FRAMES", "SCALE", "DATA_START", 
+            Seq("DESCRIPTIONS", "X_SCREEN", "Y_SCREEN", "LABELS", "UNITS", "USED", "FRAMES", "SCALE", "DATA_START", 
               "RATE"))
           assert(get("ANALOG").parameters.map(_.name) ===
-            Set("LABELS", "DESCRIPTIONS", "SCALE", "GEN_SCALE", "OFFSET", "UNITS", "USED", "RATE"))
+            Seq("LABELS", "DESCRIPTIONS", "SCALE", "GEN_SCALE", "OFFSET", "UNITS", "USED", "RATE"))
           assert(get("FORCE_PLATFORM").parameters.map(_.name) ===
-            Set("USED", "TYPE", "CORNERS", "ORIGIN", "CHANNEL", "ZERO", "TRANSLATION", "ROTATION"))
+            Seq("USED", "TYPE", "CORNERS", "ORIGIN", "CHANNEL", "ZERO", "TRANSLATION", "ROTATION"))
           assert(get("FPLOC").parameters.map(_.name) ===
-            Set("OBJ", "MAX", "INT"))
+            Seq("OBJ", "MAX", "INT"))
           assert(get("SUBJECT").parameters.map(_.name) ===
-            Set("NAME", "NUMBER", "PROJECT", "WEIGHT", "HEIGHT", "GENDER", "DATE_OF_BIRTH", "TARGET_RADIUS"))
+            Seq("NAME", "NUMBER", "PROJECT", "WEIGHT", "HEIGHT", "GENDER", "DATE_OF_BIRTH", "TARGET_RADIUS"))
           // check various parameter types
           assert(getp[Float]("POINT", "RATE").data(0) === 50.0f) // float
           assert(getp[Int]("POINT", "DATA_START").data(0) === 11) // int

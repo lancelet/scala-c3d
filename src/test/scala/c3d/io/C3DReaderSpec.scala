@@ -39,13 +39,13 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
       val c3d: C3D = c3dV.getOrElse(fail())
 
       // check group and parameter names
-      val groupNames = Set("POINT", "ANALOG", "FORCE_PLATFORM", "FPLOC", "SUBJECT")
-      val pointNames = Set("DESCRIPTIONS", "X_SCREEN", "Y_SCREEN", "LABELS", "UNITS", "USED", "FRAMES", "SCALE", 
+      val groupNames = Seq("POINT", "ANALOG", "FORCE_PLATFORM", "FPLOC", "SUBJECT")
+      val pointNames = Seq("DESCRIPTIONS", "X_SCREEN", "Y_SCREEN", "LABELS", "UNITS", "USED", "FRAMES", "SCALE", 
         "DATA_START", "RATE")
-      val analogNames = Set("LABELS", "DESCRIPTIONS", "SCALE", "GEN_SCALE", "OFFSET", "UNITS", "USED", "RATE")
-      val fpNames = Set("USED", "TYPE", "CORNERS", "ORIGIN", "CHANNEL", "ZERO", "TRANSLATION", "ROTATION")
-      val fplocNames = Set("OBJ", "MAX", "INT")
-      val subjNames = Set("NAME", "NUMBER", "PROJECT", "WEIGHT", "HEIGHT", "GENDER", "DATE_OF_BIRTH", "TARGET_RADIUS")
+      val analogNames = Seq("LABELS", "DESCRIPTIONS", "SCALE", "GEN_SCALE", "OFFSET", "UNITS", "USED", "RATE")
+      val fpNames = Seq("USED", "TYPE", "CORNERS", "ORIGIN", "CHANNEL", "ZERO", "TRANSLATION", "ROTATION")
+      val fplocNames = Seq("OBJ", "MAX", "INT")
+      val subjNames = Seq("NAME", "NUMBER", "PROJECT", "WEIGHT", "HEIGHT", "GENDER", "DATE_OF_BIRTH", "TARGET_RADIUS")
       // group and parameter names
       assert(c3d.groups.map(_.name) === groupNames)
       assert(c3d.groups.find(_.name == "POINT").get.parameters.map(_.name) === pointNames)

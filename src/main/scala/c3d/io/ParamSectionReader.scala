@@ -222,7 +222,7 @@ private [io] object ParamSectionReader {
     name:        String, 
     description: String, 
     isLocked:    Boolean, 
-    parameters:  Set[Parameter[_]]
+    parameters:  Seq[Parameter[_]]
   ) extends Group
 
   /** Concrete case-class implementation of a C3D Parameter. */
@@ -249,7 +249,7 @@ private [io] object ParamSectionReader {
     * @param paramISeq indexed sequence corresponding to the entire parameter section
     * @return `Set[Group]` corresponding to the groups, containing parameters
     */
-  private [io] def read(paramISeq: FormattedByteIndexedSeq): Validation[String, Set[Group]] = {
+  private [io] def read(paramISeq: FormattedByteIndexedSeq): Validation[String, Seq[Group]] = {
     try {
       for {
         (groupBlocks, paramBlocks) <- chunkGroupsAndParams(paramISeq).map(partitionToGroupsAndParams _)
@@ -268,9 +268,9 @@ private [io] object ParamSectionReader {
               WrappedArrayIndexedSeq(p.dimensions.toArray), 
               WrappedArrayIndexedSeq(p.data.toArray),
               p.parameterType)
-          ReadGroup(g.name, g.description, g.isLocked, paramSeq.toSet)
+          ReadGroup(g.name, g.description, g.isLocked, paramSeq)
         }
-        groupSeq.toSet
+        groupSeq
       }
     } catch {
       case ex @ (_:IndexOutOfBoundsException | _:SliceException) =>

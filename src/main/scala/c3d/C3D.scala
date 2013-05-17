@@ -19,7 +19,7 @@ trait Group {
   def name: String
   def description: String
   def isLocked: Boolean
-  def parameters: Set[Parameter[_]]
+  def parameters: Seq[Parameter[_]]
 }
 
 trait ProcessorType
@@ -30,7 +30,7 @@ object ProcessorType {
 }
 
 trait C3D {
-  def groups: Set[Group]
+  def groups: Seq[Group]
   def processorType: ProcessorType = ProcessorType.Intel
   def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]]
 }

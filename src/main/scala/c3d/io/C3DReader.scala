@@ -53,7 +53,7 @@ object C3DReader {
   }
 
   /** Concrete case-class implementation of a C3D top-level object. */
-  private [io] final case class ReadC3D(groups: Set[Group], override val processorType: ProcessorType) extends C3D {
+  private [io] final case class ReadC3D(groups: Seq[Group], override val processorType: ProcessorType) extends C3D {
 
     def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]] = {
       groups.find { // find the named group
@@ -91,7 +91,7 @@ object C3DReader {
 
     // assemble the C3D object
     for {
-      groups: Set[Group] <- groupsV
+      groups: Seq[Group] <- groupsV
       processorType: ProcessorType <- processorTypeV
     } yield {
       ReadC3D(groups, processorType)
