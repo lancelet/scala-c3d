@@ -1,6 +1,6 @@
 package c3d.io
 
-import c3d.C3D
+import c3d.{C3D, Parameter}
 import org.scalatest.FunSpec
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
@@ -70,7 +70,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
           assert(xScreen.isLocked === false)
           assert(xScreen.dimensions === Seq(2))
           assert(xScreen.data === "+Y".toSeq)
-          assert(xScreen.parameterType === typeOf[Char])
+          assert(xScreen.parameterType === Parameter.Type.Character)
         }
       }
     }

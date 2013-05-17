@@ -28,5 +28,5 @@ final case class StringParameter(charParam: Parameter[Char]) extends Parameter[S
     val flatIndex = (for ((i, c) <- idx zip coef) yield i * c).sum
     data(flatIndex)
   }
-  val parameterType: Type = typeOf[String]
+  val parameterType: Parameter.Type = Parameter.Type.String
 }

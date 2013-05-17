@@ -1,5 +1,6 @@
 package c3d
 
+import java.io.File
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import scalaz.Validation
@@ -12,7 +13,17 @@ trait Parameter[T] {
   def data: IndexedSeq[T]
   /** Column-major access. */
   def apply(idx: IndexedSeq[Int]): T
-  def parameterType: Type
+  def parameterType: Parameter.Type
+}
+object Parameter {
+  sealed trait Type
+  object Type {
+    object String extends Type
+    object Character extends Type
+    object Byte extends Type
+    object Integer extends Type
+    object Float extends Type
+  }
 }
 
 trait Group {
@@ -22,7 +33,7 @@ trait Group {
   def parameters: Seq[Parameter[_]]
 }
 
-trait ProcessorType
+sealed trait ProcessorType
 object ProcessorType {
   object Intel extends ProcessorType
   object DEC extends ProcessorType
@@ -36,5 +47,6 @@ trait C3D {
 }
 
 object C3D {
+  def read(file: File): Validation[String, C3D] = c3d.io.C3DReader.read(file)
   def read(c3dISeq: IndexedSeq[Byte]): Validation[String, C3D] = c3d.io.C3DReader.read(c3dISeq)
 }

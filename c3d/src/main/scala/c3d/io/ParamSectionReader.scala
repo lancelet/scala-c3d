@@ -134,6 +134,20 @@ private [io] object ParamSectionReader {
     }
   }
 
+  /** Converts a type which may appear in a parameter to a [[Parameter.Type]].
+    * 
+    * @tparam T type (Char, String, Int, Byte or Float)
+    * @return corresponding [[Parameter.Type]]
+    */
+  private [io] def typeToParameterType[T:TypeTag]: Option[Parameter.Type] = typeOf[T] match {
+    case t if t =:= typeOf[Char]   => Some(Parameter.Type.Character)
+    case t if t =:= typeOf[String] => Some(Parameter.Type.Character)
+    case t if t =:= typeOf[Int]    => Some(Parameter.Type.Integer)
+    case t if t =:= typeOf[Byte]   => Some(Parameter.Type.Byte)
+    case t if t =:= typeOf[Float]  => Some(Parameter.Type.Float)
+    case _ => None
+  }
+
   /** Untyped parameter, without a connected group.
     *
     * This class passively reads parameter fields from a parameter section block.  It views all
@@ -182,7 +196,7 @@ private [io] object ParamSectionReader {
     def description: String = uParam.description
     def groupId: Int = uParam.groupId
     def dimensions: IndexedSeq[Int] = uParam.dimensions
-    def parameterType: Type = typeOf[T]  // eg: parameterType == typeOf[Char]
+    def parameterType: Parameter.Type = typeToParameterType[T].get
     def data: IndexedSeq[T] = new IndexedSeq[T] {
       val length: Int = uParam.data.length / abs(uParam.byteLengthPerElement)
       def apply(idx: Int): T = typeOf[T] match {
@@ -232,7 +246,7 @@ private [io] object ParamSectionReader {
     isLocked:      Boolean, 
     dimensions:    IndexedSeq[Int], 
     data:          IndexedSeq[T],
-    parameterType: Type
+    parameterType: Parameter.Type
   ) extends Parameter[T] {
 
     def apply(idx: IndexedSeq[Int]): T = {

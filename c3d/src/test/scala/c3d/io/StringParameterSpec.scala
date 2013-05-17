@@ -3,7 +3,7 @@ package c3d.io
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import org.scalatest.FunSpec
-import c3d.C3D
+import c3d.{C3D, Parameter}
 
 class StringParameterSpec extends FunSpec with C3DFileSource {
 
@@ -19,7 +19,7 @@ class StringParameterSpec extends FunSpec with C3DFileSource {
       assert(unitsStringParam.dimensions === IndexedSeq(1))
       assert(unitsStringParam.data === IndexedSeq("mm  "))
       assert(unitsStringParam.apply(IndexedSeq(0)) === "mm  ")
-      assert(unitsStringParam.parameterType === typeOf[String])
+      assert(unitsStringParam.parameterType === Parameter.Type.String)
     }
 
     it("should allow access to a parameter containing multiple strings") {
@@ -34,7 +34,7 @@ class StringParameterSpec extends FunSpec with C3DFileSource {
         "SHANK", "SHANK", "ANKLE", "KNEE", "DISTAL FOOT", "*", "*", "*", "*", "*", "*", "*", "*", "*", "TARGET").
         map( s => f"$s%-32s" ))
       assert(ptDescrStringParam.apply(IndexedSeq(7)) === f"${"ANKLE"}%-32s")
-      assert(ptDescrStringParam.parameterType === typeOf[String])
+      assert(ptDescrStringParam.parameterType === Parameter.Type.String)
     }
 
   }

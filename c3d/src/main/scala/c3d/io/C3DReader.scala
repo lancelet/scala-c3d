@@ -1,5 +1,6 @@
 package c3d.io
 
+import java.io.File
 import c3d.{C3D, Group, Parameter, ProcessorType}
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
@@ -62,20 +63,34 @@ object C3DReader {
         g.parameters.find(_.name.toUpperCase == parameter.toUpperCase)
       } flatMap { p: Parameter[_] => // check that the parameter type conforms with that expected
         // handle string parameters by searching for a Parameter[Char] first
-        val expectedType: Type = if (typeOf[T] == typeOf[String]) typeOf[Char] else typeOf[T]
-        if (p.parameterType == expectedType) {
-          if (typeOf[T] == typeOf[String]) {  // special handling for strings
-            val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
-            Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
+        val expectedType: Option[Parameter.Type] = ParamSectionReader.typeToParameterType[T]
+        expectedType.flatMap { t =>
+          if (p.parameterType == t) {
+            if (typeOf[T] == typeOf[String]) {  // special handling for strings
+              val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
+              Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
+            } else {
+              Some(p.asInstanceOf[Parameter[T]])
+            }
           } else {
-            Some(p.asInstanceOf[Parameter[T]])
+            None
           }
-        } else {
-          None
         }
       }
     }
 
+  }
+
+  /** Reads a C3D file from a `File`.
+    * 
+    * @param file C3D `File`.
+    * return the C3D file that has been read
+    */
+  def read(file: File): Validation[String, C3D] = {
+    FileUtils.fileToIndexedSeq(file) match {
+      case scala.util.Success(c3dISeq) => read(c3dISeq)
+      case scala.util.Failure(e) => Failure(e.toString)
+    }
   }
 
   /** Reads a C3D file from an `IndexedSeq[Byte]`.
