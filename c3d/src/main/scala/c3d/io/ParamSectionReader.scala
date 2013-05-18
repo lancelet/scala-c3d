@@ -83,8 +83,7 @@ private [io] object ParamSectionReader {
       }
     }
 
-    // Here we try to apply the accumulator.  Any failures are likely to be IndexOutOfBoundsExceptions,
-    //  which indicate invalid offsets within the parameter section.
+    // Here we try to apply the accumulator.  Any failures are likely to be due to invalid offsets.
     try {
       Success(accum(Seq.empty[FormattedByteIndexedSeq], paramISeq.slice(4, paramISeq.length)))
     } catch {
@@ -164,9 +163,15 @@ private [io] object ParamSectionReader {
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
     def description: String = block.slice(descOfs, descOfs + nDesc).map(_.toChar).mkString
     def groupId: Int = { assert(block(1) > 0); block(1) }
-    def dimensions: IndexedSeq[Int] = new IndexedSeq[Int] {
-      def length: Int = nDims
-      def apply(idx: Int): Int = block(6 + nName + idx)
+    def dimensions: IndexedSeq[Int] = {
+      if (nDims == 0) { // handle the case of a "scalar" dimension, where nDims is recorded as zero in the C3D file
+        UntypedParameter.ScalarDimension
+      } else { // handle a normal array (can still be a "scalar", or a multi-dimensional array)
+        new IndexedSeq[Int] {
+          def length: Int = nDims
+          def apply(idx: Int): Int = block(6 + nName + idx)
+        }
+      }
     }
     def byteLengthPerElement: Int = block(4 + nName)
     def data: IndexedSeq[Byte] = new IndexedSeq[Byte] {
@@ -180,6 +185,15 @@ private [io] object ParamSectionReader {
         case  1 => new UnassociatedParameter[Byte](this)
         case  2 => new UnassociatedParameter[Int](this)
         case  4 => new UnassociatedParameter[Float](this)
+      }
+    }
+  }
+  private [io] object UntypedParameter {
+    object ScalarDimension extends IndexedSeq[Int] {
+      val length: Int = 1
+      def apply(idx: Int): Int = {
+        if (idx != 0) throw new IndexOutOfBoundsException("scalar parameter: idx must be 0")
+        1
       }
     }
   }

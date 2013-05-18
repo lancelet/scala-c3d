@@ -147,15 +147,16 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
       }
     }
 
+    it("should be able to read parameters stored with zero dimensions (scalars)") {
+      C3DReader.paramSectionIndexedSeq(Sample08.EB015PI).map { ps: FormattedByteIndexedSeq =>
+        val groups: Seq[Group] = read(ps).getOrElse(fail())
+        val analog: Group = groups.find(_.name == "ANALOG").getOrElse(fail())
+        val used: Parameter[Int] = analog.parameters.find(_.name == "USED").getOrElse(fail()).
+          asInstanceOf[Parameter[Int]]
+        assert(used(IndexedSeq(0)) === 16)
+      }
+    }
+
   }
 
 }
-
-
-
-
-
-
-
-
-
