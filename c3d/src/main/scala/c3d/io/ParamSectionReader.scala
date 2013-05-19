@@ -114,16 +114,21 @@ private [io] object ParamSectionReader {
 
   /** Unassociated group, without any connected parameters.
     * 
-    * This class passively reads group fields from a parameter section block.
+    * Normal [[Group]]s contain a sequence of parameters.  However, when reading groups from the file, they are
+    * associated with their parameters using integer group IDs.  This "unassociated" group class represents a
+    * group without its associated parameters, and still containing the group ID.
     * 
-    * @param block parameter section block
+    * This class reads its properties (name, description, ID, and a locked flag) lazily, fetching them from
+    * an underlying [[FormattedByteIndexedSeq]] when requested.
+    * 
+    * @param block parameter section block corresponding to a group
     */
   private [io] final class UnassociatedGroup(block: FormattedByteIndexedSeq) {
-    private val nName: Int = abs(block(0))
-    private val nDesc: Int = block(4 + nName)
+    private val nName: Int = abs(block(0))     // # of characters in name
+    private val nDesc: Int = block(4 + nName)  // # of characters in description
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
     def description: String = block.slice(5 + nName, 5 + nName + nDesc).map(_.toChar).mkString
-    def id: Int = { assert(block(1) < 0); -block(1) }
+    def id: Int = { assert(block(1) < 0); -block(1) }  // ID of a group must be negative
     def isLocked: Boolean = block(0) < 0
 
     {
@@ -134,6 +139,8 @@ private [io] object ParamSectionReader {
   }
 
   /** Converts a type which may appear in a parameter to a [[Parameter.Type]].
+    * 
+    * Strings are converted to [[Parameter.Type.Character]].
     * 
     * @tparam T type (Char, String, Int, Byte or Float)
     * @return corresponding [[Parameter.Type]]
@@ -149,17 +156,19 @@ private [io] object ParamSectionReader {
 
   /** Untyped parameter, without a connected group.
     *
-    * This class passively reads parameter fields from a parameter section block.  It views all
-    * of the data that it contains as an `IndexedSeq` of bytes.
+    * Normal [[Parameter]]s are contained as a sequence within their owning group.  However, when reading parameters
+    * from the file, they are associated with their group using its group ID.  This "unassociated" parameter type
+    * represents a parameter without being embedded in its group, yet still containing the group ID.  Further, normal
+    * parameters are typed, whereas this class sees its data as an `IndexedSeq[Byte]`.
     * 
-    * @param block parameter section block
+    * @param block parameter section block corresponding to a parameter
     */
   private [io] final class UntypedParameter(val block: FormattedByteIndexedSeq) {
-    private def nName: Int = abs(block(0))
-    private def nDesc: Int = block(6 + nName + nDims + data.length)
-    private def descOfs: Int = 7 + nName + nDims + data.length
-    private def nElem: Int = abs(byteLengthPerElement)
-    private def nDims: Int = block(5 + nName)
+    private def nName: Int = abs(block(0))                           // # of characters in name
+    private def nDesc: Int = block(6 + nName + nDims + data.length)  // # of characters in description
+    private def descOfs: Int = 7 + nName + nDims + data.length       // offset to the start of the description
+    private def nElem: Int = abs(byteLengthPerElement)               // number of bytes in an element of the data
+    private def nDims: Int = block(5 + nName)                        // number of dimensions
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
     def description: String = block.slice(descOfs, descOfs + nDesc).map(_.toChar).mkString
     def groupId: Int = { assert(block(1) > 0); block(1) }
@@ -189,6 +198,7 @@ private [io] object ParamSectionReader {
     }
   }
   private [io] object UntypedParameter {
+    /** This object is `IndexedSeq[Int](1)`, used to represent scalars. */
     object ScalarDimension extends IndexedSeq[Int] {
       val length: Int = 1
       def apply(idx: Int): Int = {
@@ -200,33 +210,32 @@ private [io] object ParamSectionReader {
 
   /** Unassociated parameter, without a connected group, but with typing information.
     * 
-    * This class passively reads parameter fields from a parameter section block.  Instances should be
-    * created by calling [[UntypedParameter#asUnassociatedParameter]].
+    * Normal [[Parameter]]s are contained as a sequence within their owning group.  However, when reading parameters
+    * from the file, they are associated with their group using its group ID.  This "unassociated" parameter type
+    * represents a parameter without being embedded in a group, yet still containing the group ID.
+    *
+    * This class functions as a kind of second-stage interpretation of a group, after it has already been read using
+    * the [[UntypedParameter]] class.
     *
     * @param uParam untyped parameter
     */
-  private [io] final class UnassociatedParameter[T](uParam: UntypedParameter)(implicit ev: TypeTag[T]) {
+  private [io] final class UnassociatedParameter[T:TypeTag](uParam: UntypedParameter) {
     def name: String = uParam.name
     def description: String = uParam.description
     def groupId: Int = uParam.groupId
     def dimensions: IndexedSeq[Int] = uParam.dimensions
     def parameterType: Parameter.Type = typeToParameterType[T].get
-    def data: IndexedSeq[T] = new IndexedSeq[T] {
-      val length: Int = uParam.data.length / abs(uParam.byteLengthPerElement)
-      def apply(idx: Int): T = typeOf[T] match {
-        case t if t =:= typeOf[Char]  => uParam.data(idx).toChar.asInstanceOf[T]
-        case t if t =:= typeOf[Byte]  => uParam.data(idx).asInstanceOf[T]
-        case t if t =:= typeOf[Int]   => {
-          val i0 = 2 * idx
-          uParam.block.binaryFormat.bytesToInt(uParam.data(i0), uParam.data(i0+1)).asInstanceOf[T]
-        }
-        case t if t =:= typeOf[Float] => {
-          val i0 = 4 * idx
-          uParam.block.binaryFormat.bytesToFloat(
-            uParam.data(i0), uParam.data(i0+1), uParam.data(i0+2), uParam.data(i0+3)
-          ).asInstanceOf[T]
-        }
+    def data: IndexedSeq[T] = {
+      import Parameter.Type
+      val typ: Parameter.Type = typeToParameterType[T].get
+      val iSeq: IndexedSeq[_] = typ match {
+        case Type.Byte      => uParam.data
+        case Type.Character => UnassociatedParameter.ByteToCharIndexedSeq(uParam.data)
+        case Type.Integer   => UnassociatedParameter.ByteToIntIndexedSeq(uParam.data, uParam.block.binaryFormat)
+        case Type.Float     => UnassociatedParameter.ByteToFloatIndexedSeq(uParam.data, uParam.block.binaryFormat)
+        case _ => throw new AssertionError("unexpected parameter type (should be Byte, Char, Int or Float)")
       }
+      iSeq.asInstanceOf[IndexedSeq[T]]
     }
     def isLocked: Boolean = uParam.isLocked
 
@@ -242,6 +251,23 @@ private [io] object ParamSectionReader {
         s"expected ${expectedByteLengthPerElement} bytes per element, but found ${uParam.byteLengthPerElement}")
       require(uParam.data.length % uParam.byteLengthPerElement == 0,
         "length of data is not an even multiple of the number of bytes per element")
+    }
+  }
+  private [io] object UnassociatedParameter {
+    /** Interprets an `IndexedSeq[Byte]` as an `IndexedSeq[Char]`. */
+    final case class ByteToCharIndexedSeq(bis: IndexedSeq[Byte]) extends IndexedSeq[Char] {
+      def length: Int = bis.length
+      def apply(idx: Int): Char = bis(idx).toChar
+    }
+    /** Interprets an `IndexedSeq[Byte]` as an `IndexedSeq[Int]`. */
+    final case class ByteToIntIndexedSeq(bis: IndexedSeq[Byte], bf: BinaryFormat) extends IndexedSeq[Int] {
+      val length: Int = bis.length / 2
+      def apply(idx: Int): Int = { val i0 = 2 * idx; bf.bytesToInt(bis(i0), bis(i0+1)) }
+    }
+    /** Interprets an `IndexedSeq[Byte]` as an `IndexedSeq[Float]`. */
+    final case class ByteToFloatIndexedSeq(bis: IndexedSeq[Byte], bf: BinaryFormat) extends IndexedSeq[Float] {
+      val length: Int = bis.length / 4
+      def apply(idx: Int): Float = { val i0 = 4 * idx; bf.bytesToFloat(bis(i0), bis(i0+1), bis(i0+2), bis(i0+3)) }
     }
   }
 
@@ -263,10 +289,18 @@ private [io] object ParamSectionReader {
     parameterType: Parameter.Type
   ) extends Parameter[T] {
 
+    private val cprod: Array[Int] = dimensions.scanLeft(1)(_ * _).drop(1).toArray  // cumulative product of dimensions
+
     def apply(idx: IndexedSeq[Int]): T = {
       require(idx.length == dimensions.length, "index must match data dimensions")
-      val coeff = dimensions.scanLeft(1)(_ * _)  // cumulative product
-      val flatIndex = (for ((i, d) <- idx zip coeff) yield i * d).sum
+      val flatIndex: Int = {
+        // tail-recursive function to calculate the flattened index
+        @tailrec def accumIndex(flat: Int, d: Int): Int = {
+          if (d == dimensions.length) flat
+          else accumIndex(flat + idx(d) * cprod(d-1), d+1)
+        }
+        accumIndex(idx(0), 1)
+      }
       data(flatIndex)
     }
 
