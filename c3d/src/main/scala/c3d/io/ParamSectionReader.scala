@@ -287,24 +287,7 @@ private [io] object ParamSectionReader {
     dimensions:    IndexedSeq[Int], 
     data:          IndexedSeq[T],
     parameterType: Parameter.Type
-  ) extends Parameter[T] {
-
-    private val cprod: Array[Int] = dimensions.scanLeft(1)(_ * _).drop(1).toArray  // cumulative product of dimensions
-
-    def apply(idx: IndexedSeq[Int]): T = {
-      require(idx.length == dimensions.length, "index must match data dimensions")
-      val flatIndex: Int = {
-        // tail-recursive function to calculate the flattened index
-        @tailrec def accumIndex(flat: Int, d: Int): Int = {
-          if (d == dimensions.length) flat
-          else accumIndex(flat + idx(d) * cprod(d-1), d+1)
-        }
-        accumIndex(idx(0), 1)
-      }
-      data(flatIndex)
-    }
-
-  }
+  ) extends Parameter[T] with ParameterTemplate[T]
 
   /** Reads in the entire parameter section.
     * 

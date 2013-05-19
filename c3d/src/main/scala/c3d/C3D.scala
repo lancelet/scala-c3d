@@ -14,6 +14,9 @@ trait Parameter[T] {
   /** Column-major access. */
   def apply(idx: IndexedSeq[Int]): T
   def parameterType: Parameter.Type
+
+  def apply(i0: Int, i1: Int): T
+  def apply(i0: Int, i1: Int, i2: Int): T
 }
 object Parameter {
   sealed trait Type

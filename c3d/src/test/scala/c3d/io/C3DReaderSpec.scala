@@ -91,6 +91,24 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
       assert(pl(IndexedSeq(1, 37)) === 'S')
     }
 
+    it("should index multi-dimensional params through utility apply() methods") {
+      val c3d = C3DReader.read(Sample08.EB015PI).getOrElse(fail())
+      val pl = c3d.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
+      // check for an error if indices are wrong
+      intercept[IndexOutOfBoundsException] { pl(4, 0) }
+      intercept[IndexOutOfBoundsException] { pl(0, 48) }
+      // check for an error if the wrong utility method is called
+      intercept[AssertionError] { pl(0, 0, 0) }
+      // first line
+      assert(pl(0, 0) === 'R')
+      assert(pl(1, 0) === 'F')
+      assert(pl(2, 0) === 'T')
+      assert(pl(3, 0) === '1')
+      // last line
+      assert(pl(0, 37) === 'L')
+      assert(pl(1, 37) === 'S')
+    }
+
     it("should read string parameters") {
       val c3d = C3DReader.read(Sample08.EB015PI).getOrElse(fail())
       // should fail on non-String parameters

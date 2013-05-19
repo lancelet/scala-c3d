@@ -11,7 +11,7 @@ import c3d.Parameter
   * 
   * @param charParam character parameter to convert into a string parameter
   */
-final case class StringParameter(charParam: Parameter[Char]) extends Parameter[String] {
+final case class StringParameter(charParam: Parameter[Char]) extends Parameter[String] with ParameterTemplate[String] {
   def name: String = charParam.name
   def description: String = charParam.description
   def isLocked: Boolean = charParam.isLocked
@@ -22,11 +22,6 @@ final case class StringParameter(charParam: Parameter[Char]) extends Parameter[S
   def data: IndexedSeq[String] = {
     assert(charParam.data.length % charParam.dimensions(0) == 0, "data cannot be divided into even chunks")
     charParam.data.grouped(charParam.dimensions(0)).map(_.mkString).toIndexedSeq
-  }
-  def apply(idx: IndexedSeq[Int]): String = {
-    val coef = dimensions.scanLeft(1)(_ * _)
-    val flatIndex = (for ((i, c) <- idx zip coef) yield i * c).sum
-    data(flatIndex)
   }
   val parameterType: Parameter.Type = Parameter.Type.String
 }
