@@ -49,7 +49,6 @@ object XMLTestSuiteSettings {
 object Resolvers {
   val scalaToolsSnapshots = "Scala Tools Snapshots" at
     "http://scala-tools.org/repo-snapshots/"
-
   val projectResolvers = Seq(scalaToolsSnapshots)
 }
 
@@ -59,6 +58,7 @@ object Dependencies {
   val scalaz       = "org.scalaz"     %% "scalaz-core"   % "7.0.0"
   val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.M6-SNAP16" % "test"
   val scallop      = "org.rogach"     %% "scallop"       % "0.9.1"
+  val xmlunit      = "xmlunit"        %  "xmlunit"       % "1.4"
 }
 
 object C3DDependencies {
@@ -73,7 +73,7 @@ object C3D2XMLDependencies {
 
 object XMLTestSuiteDependencies {
   import Dependencies._
-  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest)
+  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest, scallop, xmlunit)
 }
 
 object Tasks {

@@ -7,7 +7,7 @@ import scala.xml._
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
 
-object C2D2XML {
+object C3D2XML {
 
   /** Configuration of command-line arguments. */
   class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
