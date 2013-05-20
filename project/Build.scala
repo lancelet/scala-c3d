@@ -7,9 +7,10 @@ object CommonBuildSettings {
   val buildScalacOptions = Seq.empty[String]
 
   val commonBuildSettings = Defaults.defaultSettings ++ Seq(
-    version       := buildVersion,
-    scalaVersion  := buildScalaVersion,
-    scalacOptions := buildScalacOptions
+    version                   := buildVersion,
+    scalaVersion              := buildScalaVersion,
+    scalacOptions             := buildScalacOptions,
+    parallelExecution in Test := false  // turn off parallel execution of tests until SI-6240 is fixed
   )
 }
 
@@ -37,6 +38,14 @@ object C3D2XMLBuildSettings {
   )
 }
 
+object XMLTestSuiteSettings {
+  import CommonBuildSettings._
+  val buildName = "xml-test-suite"
+  val buildSettings = commonBuildSettings ++ Seq(
+    name := buildName
+  )
+}
+
 object Resolvers {
   val scalaToolsSnapshots = "Scala Tools Snapshots" at
     "http://scala-tools.org/repo-snapshots/"
@@ -45,20 +54,26 @@ object Resolvers {
 }
 
 object Dependencies {
-  val scalaz       = "org.scalaz"     %% "scalaz-core"   % "7.0.0"
+  val scalalang    = "org.scala-lang" %  "scala-library" % "2.10.1"  // why is this required?
   val scalareflect = "org.scala-lang" %  "scala-reflect" % "2.10.1"
+  val scalaz       = "org.scalaz"     %% "scalaz-core"   % "7.0.0"
   val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.M6-SNAP16" % "test"
   val scallop      = "org.rogach"     %% "scallop"       % "0.9.1"
 }
 
 object C3DDependencies {
   import Dependencies._
-  val projectDependencies = Seq(scalaz, scalareflect, scalatest)
+  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest)
 }
 
 object C3D2XMLDependencies {
   import Dependencies._
-  val projectDependencies = Seq(scalaz, scalareflect, scalatest, scallop)
+  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest, scallop)
+}
+
+object XMLTestSuiteDependencies {
+  import Dependencies._
+  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest)
 }
 
 object Tasks {
@@ -118,6 +133,19 @@ object C3DScalaBuild extends Build {
       base = file("."),
       settings = buildSettings ++ projectTasks
     ) aggregate(c3d, c3d2xml)
+  }
+
+  lazy val xmlTestSuite = {
+    import XMLTestSuiteSettings._
+    import XMLTestSuiteDependencies._
+    Project(
+      id = "xml-test-suite",
+      base = file("xml-test-suite"),
+      settings = buildSettings ++ Seq(
+        resolvers           := projectResolvers,
+        libraryDependencies ++= projectDependencies
+      )
+    ) dependsOn (c3d, c3d2xml)
   }
 
 }
