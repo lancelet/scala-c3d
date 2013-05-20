@@ -5,6 +5,7 @@ import c3d.{C3D, Parameter}
 import org.rogach.scallop._
 import scala.xml._
 import scala.reflect.runtime.universe._
+import scalaz.{Failure, Success, Validation}
 
 object C2D2XML {
 
@@ -25,18 +26,54 @@ object C2D2XML {
 
     // read the input file specified
     val c3dFileName: String = conf.fileName()
-    val c3d: C3D = readC3DFile(c3dFileName)
 
     // create name of output file
     val xmlFileName: String = if (conf.output.isDefined) conf.output() else c3dFileNameToXMLName(c3dFileName)
-    println(s"xmlFileName = $xmlFileName")
 
-    // generate XML tree
-    val xml: Elem = generateXML(c3d)
+    // do conversion
+    c3d2xml(new File(c3dFileName), new File(xmlFileName)).fold (
+      errString => {
+        println("Could not perform conversion.")
+        println(s"  Error: $errString")
+      },
+      success => success
+    )
+  }
 
-    // save XML to file
-    saveXML(xmlFileName, xml)
+  /** Converts a C3D `File` to an XML `File`.
+    * 
+    * This method is suitable for calling as a library function.
+    * 
+    * @param c3dFile C3D input `File`
+    * @param xmlFile XML output `File`
+    * 
+    * @return `Validation` of `Unit` for success and a `String` for failure.
+    */
+  def c3d2xml(c3dFile: File, xmlFile: File): Validation[String, Unit] = {
+    // read the C3D file
+    C3D.read(c3dFile).flatMap { c3d =>
+      // generate xml tree
+      val xml: Elem = generateXML(c3d)
+      // save XML to file
+      saveXML(xmlFile, xml)
+    }
+  }
 
+  /** Converts a C3D `File` to an XML `String`.
+    * 
+    * @param c3dFile C3D input `File`
+    * 
+    * @return `Validation` containing the XML `String`, or a `String` for failure.
+    */
+  def c3d2xmlString(c3dFile: File): Validation[String, String] = {
+    // read the C3D file
+    C3D.read(c3dFile).map { c3d =>
+      // generate xml tree
+      val xml: Elem = generateXML(c3d)
+      // generate the XML string
+      val xmlString = (new PrettyPrinter(80, 2)).format(xml)
+      xmlString
+    }
   }
 
   /** Generate XML tree for the C3D file.
@@ -44,14 +81,14 @@ object C2D2XML {
     * @param c3d C3D structure
     * @return XML element
     */
-  def generateXML(c3d: C3D): Elem = {
+  private def generateXML(c3d: C3D): Elem = {
     <c3d>{
     generateGroups(c3d)
     }</c3d>
   }
 
   /** Generate XML data for groups and parameters. */
-  def generateGroups(c3d: C3D): Elem = {
+  private def generateGroups(c3d: C3D): Elem = {
     <groups>{
       for (group <- c3d.groups) yield {
         <group 
@@ -105,35 +142,17 @@ object C2D2XML {
     * @param xmlFileName name of the XML file to which the XML document should be saved
     * @param xml XML tree
     */
-  def saveXML(xmlFileName: String, xml: Elem) {
+  private def saveXML(xmlFile: File, xml: Elem): Validation[String, Unit] = {
     val xmlString = (new PrettyPrinter(80, 2)).format(xml)
-    val fileWriter = new FileWriter(new File(xmlFileName))
+    val fileWriter = new FileWriter(xmlFile)
     try {
       fileWriter.write(xmlString)
+      Success()
     } catch {
-      case ioe: IOException => {
-        println(s"Could not write file $xmlFileName.")
-        println(s"  Error message: ${ioe.toString}")
-      }
+      case ioe: IOException => Failure(ioe.toString)
     } finally {
       fileWriter.close()
     }
-  }
-
-  /** Reads a C3D file, failing with sys.exit().
-    * 
-    * @param fileName name of input C3D file
-    * @return C3D structure
-    */
-  def readC3DFile(fileName: String): C3D = {
-    C3D.read(new File(fileName)) fold (
-      failString => {
-        println(s"Could not read C3D file $fileName.")
-        println(s"  Error message: $failString")
-        sys.exit(-1)
-      },
-      c3d => c3d
-    )
   }
 
   /** Converts a C3D file name to an XML file name.
