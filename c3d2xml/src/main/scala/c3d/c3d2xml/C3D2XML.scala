@@ -1,8 +1,9 @@
 package c3d.c3d2xml
 
 import java.io.{File, FileWriter, IOException}
-import c3d.{C3D, Parameter}
+import c3d.{C3D, Group, Parameter}
 import org.rogach.scallop._
+import scala.collection.immutable._
 import scala.xml._
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
@@ -10,7 +11,7 @@ import scalaz.{Failure, Success, Validation}
 object C3D2XML {
 
   /** Configuration of command-line arguments. */
-  class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
+  class Conf(arguments: Array[String]) extends ScallopConf(arguments) {
     val fileName = trailArg[String](name = "filename.c3d", required = true,
       descr = "Name of the C3D file to convert to XML.")
     val output = opt[String](descr = "Name of an output XML file.")
@@ -83,12 +84,57 @@ object C3D2XML {
     */
   private def generateXML(c3d: C3D): Elem = {
     <c3d>{
-    generateGroups(c3d)
+      generateGroups(c3d)
     }</c3d>
   }
 
   /** Generate XML data for groups and parameters. */
   private def generateGroups(c3d: C3D): Elem = {
+
+    def typeString(ptype: Parameter.Type): String = {
+      import Parameter.Type
+      ptype match {
+        case Type.Character => "character"
+        case Type.Integer   => "integer"
+        case Type.Byte      => "byte"
+        case Type.Float     => "float"
+        case _ => throw new IllegalArgumentException("unexpected raw type encountered")
+      }
+    }
+
+    def dims(dims: Seq[Int]): Elem = <dimensions>{ for (d <- dims) yield <dim size={d.toString}/> }</dimensions>
+
+    def charData(group: String, param: String): PCData = 
+      PCData(c3d.getParameter[String](group, param).get.data.mkString)
+
+    def byteData(group: String, param: String): PCData = 
+      PCData(c3d.getParameter[Byte](group, param).get.data.map(b => f"0x$b%02X").mkString(","))
+
+    def paramData(g: Group, p: Parameter[_]): PCData = {
+      assert(g.parameters contains p)
+      import Parameter.Type
+      p.parameterType match {
+        case Type.Character => charData(g.name, p.name)
+        case Type.Byte      => byteData(g.name, p.name)
+        case _              => PCData(p.data.mkString(","))
+      }
+    }
+
+    def param(g: Group, p: Parameter[_]): Elem = {
+      assert(g.parameters contains p)
+      <parameter 
+        name={p.name} 
+        description={p.description}
+        isLocked={p.isLocked.toString} 
+        type={typeString(p.parameterType)}
+      >{
+        scala.xml.Group(Seq(
+          dims(p.dimensions),
+          <data>{ paramData(g, p) }</data>
+        ))
+      }</parameter>
+    }
+
     <groups>{
       for (group <- c3d.groups) yield {
         <group 
@@ -96,45 +142,11 @@ object C3D2XML {
           description={group.description}
           isLocked={group.isLocked.toString}
         >{
-          for (parameter <- group.parameters) yield {
-            val typeString = parameter.parameterType match {
-              case Parameter.Type.Character => "character"
-              case Parameter.Type.Integer   => "integer"
-              case Parameter.Type.Byte      => "byte"
-              case Parameter.Type.Float     => "float"
-              case _ => {
-                println("unexpected raw parameter type found")
-                sys.exit(-1)
-              }
-            }
-            <parameter 
-              name={parameter.name}
-              description={parameter.description}
-              isLocked={parameter.isLocked.toString}
-              type={typeString}
-            >{
-              <dimensions>{
-                for (d <- parameter.dimensions) yield <dimension size={d.toString}/>
-              }</dimensions>
-              <data>{
-                val data = parameter.parameterType match {
-                  case Parameter.Type.Character => {
-                    val stringParam = c3d.getParameter[String](group.name, parameter.name).get
-                    PCData(stringParam.data.mkString)
-                  }
-                  case Parameter.Type.Byte => {
-                    val pdata = parameter.asInstanceOf[Parameter[Byte]].data
-                    PCData(pdata.map(b => f"0x$b%02X").mkString(","))
-                  }
-                  case _ => PCData(parameter.data.mkString(","))
-                }
-                data
-              }</data>
-            }</parameter>
-          }
+          for (parameter <- group.parameters) yield param(group, parameter)
         }</group>
       }
     }</groups>
+
   }
 
   /** Saves an XML tree to a file.

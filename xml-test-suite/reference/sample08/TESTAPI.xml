@@ -1,0 +1,303 @@
+<c3d>
+  <groups>
+    <group name="POINT" description="3-D point parameters" isLocked="false">
+      <parameter 
+      name="DESCRIPTIONS" description="  Point descriptions" isLocked="false" type="character">
+        <dimensions>
+          <dim size="32"/>
+          <dim size="20"/>
+        </dimensions>
+        <data>
+          <![CDATA[DIST/LAT FOOT                   INSTEP                          PROX LAT FOOT                   SHANK                           SHANK                           SHANK                           SHANK                           ANKLE                           KNEE                            DISTAL FOOT                     *                               *                               *                               *                               *                               *                               *                               *                               *                               TARGET                          ]]>
+        </data>
+</parameter>
+      <parameter 
+      name="X_SCREEN" description="  Lab. axis along X-screen axis" isLocked="false" type="character">
+        <dimensions>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[+Y]]></data>
+</parameter>
+      <parameter 
+      name="Y_SCREEN" description="  Lab. axis along Y-screen axis" isLocked="false" type="character">
+        <dimensions>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[+Z]]></data>
+</parameter>
+      <parameter 
+      name="LABELS" description="Point labels" isLocked="false" type="character">
+        <dimensions>
+          <dim size="4"/>
+          <dim size="48"/>
+        </dimensions>
+        <data>
+          <![CDATA[RFT1RFT2RFT3LFT1LFT2LFT3RSK1RSK2RSK3RSK4LSK1LSK2LSK3LSK4RTH1RTH2RTH3RTH4LTH1LTH2LTH3LTH4PV1 PV2 PV3 pv4 TR2 TR3 RA  LA  RK  LK  RH  LH  RPP LPP RS  LS                                          ]]>
+        </data>
+</parameter>
+      <parameter 
+      name="UNITS" description="  Distance measurement units" isLocked="false" type="character">
+        <dimensions>
+          <dim size="4"/>
+        </dimensions>
+        <data><![CDATA[mm ]]></data>
+</parameter>
+      <parameter 
+      name="USED" description="* Number of points used" isLocked="true" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[26]]></data>
+</parameter>
+      <parameter 
+      name="FRAMES" description="* Number of video frames" isLocked="true" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[194]]></data>
+</parameter>
+      <parameter 
+      name="SCALE" description="* Point data scale factor" isLocked="true" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[0.083333336]]></data>
+</parameter>
+      <parameter 
+      name="DATA_START" description="* First record of video/analog data" isLocked="true" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[11]]></data>
+</parameter>
+      <parameter 
+      name="RATE" description="* Video data frame rate" isLocked="true" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[50.0]]></data>
+</parameter>
+    </group>
+    <group name="ANALOG" description="Analog data parameters" isLocked="false">
+      <parameter 
+      name="LABELS" description="  Analog labels" isLocked="false" type="character">
+        <dimensions>
+          <dim size="4"/>
+          <dim size="32"/>
+        </dimensions>
+        <data>
+          <![CDATA[FX1 FY1 FZ1 MX1 MY1 MZ1 CH7 CH8 FX2 FY2 FZ2 MX2 MY2 MZ2 CH15CH16CH17CH18CH19CH20CH21CH22CH23CH24CH25CH26CH27CH28CH29CH30CH31CH32]]>
+        </data>
+</parameter>
+      <parameter 
+      name="DESCRIPTIONS" description="  Analog descriptions" isLocked="false" type="character">
+        <dimensions>
+          <dim size="32"/>
+          <dim size="32"/>
+        </dimensions>
+        <data>
+          <![CDATA[FORCE X-COMP 1                  FORCE Y-COMP 1                  FORCE Z-COMP 1                  X-MOMENT 1                      Y-MOMENT 1                      Z-MOMENT 1                      X-ACCELEROMETER                 Y-ACCELEROMETER                 FORCE X-COMP 2                  FORCE Y-COMP 2                  FORCE Z-COMP 2                  X-MOMENT 2                      Y-MOMENT 2                      Z-MOMENT 2                      Z-ACCELEROMETER                 FORCE TRANSDUCER                TIBIALIS ANTERIOR EMG - ELE#1   GASTROCNEMIUS EMG - ELE#2       SOLEUS EMG - ELE#3              QUADRICEPS VL EMG - ELE#4       QUADRICEPS VM EMG - ELE#9       BICEPS FEMORIS EMG - ELE#8      RECTUS ABDOMINIUS EMG - ELE#10  ERECTOR SPINAE EMG - ELE#7      CHANNEL 25                      CHANNEL 26                      CHANNEL 27                      CHANNEL 28                      CHANNEL 29                      CHANNEL 30                      CHANNEL 31                      CHANNEL 32                      ]]>
+        </data>
+</parameter>
+      <parameter 
+      name="SCALE" description="  Analog scale factors" isLocked="false" type="float">
+        <dimensions>
+          <dim size="32"/>
+        </dimensions>
+        <data>
+          <![CDATA[-0.86,-0.884,-1.488,-239.36,-227.74,-92.9,1.0,1.0,-0.884,-0.884,-1.526,-245.6,-231.2,-96.04,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]]>
+        </data>
+</parameter>
+      <parameter 
+      name="GEN_SCALE" description="  General scale factor" isLocked="false" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[0.5]]></data>
+</parameter>
+      <parameter 
+      name="OFFSET" description="  Analog offsets" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="32"/>
+        </dimensions>
+        <data>
+          <![CDATA[2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048]]>
+        </data>
+</parameter>
+      <parameter 
+      name="UNITS" description="  Analog units" isLocked="false" type="character">
+        <dimensions>
+          <dim size="4"/>
+          <dim size="32"/>
+        </dimensions>
+        <data>
+          <![CDATA[nt  nt  nt  ntmmntmmntmmd.u.d.u.nt  nt  nt  ntmmntmmntmmd.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.d.u.]]>
+        </data>
+</parameter>
+      <parameter 
+      name="USED" description="* Number of analog channels used" isLocked="true" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[16]]></data>
+</parameter>
+      <parameter 
+      name="RATE" description="* Analog data frame rate" isLocked="true" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[200.0]]></data>
+</parameter>
+    </group>
+    <group 
+    name="FORCE_PLATFORM" description="Force platform parameters" isLocked="false">
+      <parameter 
+      name="USED" description="  Number of FP's used" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[2]]></data>
+</parameter>
+      <parameter 
+      name="TYPE" description="  Force platform type" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[2,2]]></data>
+</parameter>
+      <parameter 
+      name="CORNERS" description="  Corner locations" isLocked="false" type="float">
+        <dimensions>
+          <dim size="3"/>
+          <dim size="4"/>
+          <dim size="2"/>
+        </dimensions>
+        <data>
+          <![CDATA[520.0451,1242.1694,0.62186754,57.04628,1243.1996,0.6211077,58.1765,1751.1963,2.081213,521.17535,1750.1661,2.0819728,53.655487,1139.9977,1.9204264,516.6432,1143.3159,1.2880275,520.2825,635.33014,0.18136889,57.29477,632.01184,0.81376773]]>
+        </data>
+</parameter>
+      <parameter 
+      name="ORIGIN" description="  FP relative to geometrical" isLocked="false" type="float">
+        <dimensions>
+          <dim size="3"/>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[-4.4,1.9,-21.6,-4.06,3.81,-20.06]]></data>
+</parameter>
+      <parameter 
+      name="CHANNEL" description="  Analog channels used" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="6"/>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[1,2,3,4,5,6,9,10,11,12,13,14]]></data>
+</parameter>
+      <parameter 
+      name="ZERO" description="  Frame interval to have zero offset" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[1,10]]></data>
+</parameter>
+      <parameter 
+      name="TRANSLATION" description="Location of center of force plate" isLocked="false" type="float">
+        <dimensions>
+          <dim size="3"/>
+          <dim size="2"/>
+        </dimensions>
+        <data>
+          <![CDATA[284.70642,1494.7306,22.945982,291.02927,891.45935,21.113586]]>
+        </data>
+</parameter>
+      <parameter 
+      name="ROTATION" description="Transformation from PCS to LCS" isLocked="false" type="float">
+        <dimensions>
+          <dim size="3"/>
+          <dim size="3"/>
+          <dim size="2"/>
+        </dimensions>
+        <data>
+          <![CDATA[0.9999975,-0.0022248449,8.035767E-6,-0.0022248586,-0.9999934,0.002874212,1.6410382E-6,-0.0028742228,-0.9999959,-0.99997336,-0.00716395,-0.0013814466,-0.0071669356,0.999972,0.0021686188,0.0013658721,0.0021784618,-0.9999967]]>
+        </data>
+</parameter>
+</group>
+    <group name="FPLOC" description="FP LOC PARAMETERS" isLocked="false">
+      <parameter name="OBJ" description="OBJ COORD" isLocked="false" type="float">
+        <dimensions>
+          <dim size="3"/>
+          <dim size="4"/>
+          <dim size="2"/>
+        </dimensions>
+        <data>
+          <![CDATA[208.0,230.0,-45.0,-208.0,230.0,-96.0,-208.0,-230.0,-96.0,208.0,-230.0,-96.0,208.0,230.0,-69.0,-208.0,230.0,-96.0,-208.0,-230.0,-96.0,208.0,-230.0,-96.0]]>
+        </data>
+      </parameter>
+      <parameter 
+      name="MAX" description="DIMENSION OF OBJ FOR FP" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[2]]></data>
+</parameter>
+      <parameter 
+      name="INT" description="C3D INTERVAL SAMPLING" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="2"/>
+        </dimensions>
+        <data><![CDATA[1,7]]></data>
+</parameter>
+    </group>
+    <group name="SUBJECT" description="Subject Parameters" isLocked="false">
+      <parameter name="NAME" description="" isLocked="false" type="character">
+        <dimensions>
+          <dim size="25"/>
+        </dimensions>
+        <data><![CDATA[elizabeth baumgartner ]]></data>
+      </parameter>
+      <parameter name="NUMBER" description="" isLocked="false" type="integer">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[0]]></data>
+      </parameter>
+      <parameter name="PROJECT" description="" isLocked="false" type="character">
+        <dimensions>
+          <dim size="30"/>
+        </dimensions>
+        <data><![CDATA[PARKINSONS EVAL ]]></data>
+      </parameter>
+      <parameter name="WEIGHT" description="UNITS=kg" isLocked="false" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[82.7]]></data>
+      </parameter>
+      <parameter name="HEIGHT" description="UNITS=mm" isLocked="false" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[1.63]]></data>
+      </parameter>
+      <parameter name="GENDER" description="M,F" isLocked="false" type="character">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[f]]></data>
+      </parameter>
+      <parameter 
+      name="DATE_OF_BIRTH" description="MONTH/DAY/YEAR" isLocked="false" type="character">
+        <dimensions>
+          <dim size="8"/>
+        </dimensions>
+        <data><![CDATA[6/14/35 ]]></data>
+</parameter>
+      <parameter 
+      name="TARGET_RADIUS" description="SEGMENT ENDPOINT TARGET RADIUS" isLocked="false" type="float">
+        <dimensions>
+          <dim size="1"/>
+        </dimensions>
+        <data><![CDATA[0.0]]></data>
+</parameter>
+    </group>
+  </groups>
+</c3d>

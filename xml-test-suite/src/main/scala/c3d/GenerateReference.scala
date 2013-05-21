@@ -67,12 +67,17 @@ object GenerateReference {
 
   /** Generates XML file for the Sample08 examples from c3d.org.
     * 
-    * All of the Sample08 C3D files are the same C3D file encoded in different ways.  Hence, we only need a single XML
-    * file to represent all of them.  This single XML file is generated from EB015PI.c3d, which is the simplest of the
-    * multiple C3D files provided.
+    * All of the Sample08 C3D files are the same C3D file encoded in different ways.  However, since POINT:DATA_START
+    * is stored differently for each file, a separate XML comparison file is required for each.
     * 
     * Please see the readme.txt file provided with sample08 for more information.
     */
-  private def generateSample08() = generateXMLfromC3D("sample08/EB015PI.c3d", "sample08/sample08.xml")
+  private def generateSample08() = {
+    generateXMLfromC3D("sample08/EB015PI.c3d", "sample08/EB015PI.xml")
+    generateXMLfromC3D("sample08/TESTAPI.c3d", "sample08/TESTAPI.xml")
+    generateXMLfromC3D("sample08/TESTBPI.c3d", "sample08/TESTBPI.xml")
+    generateXMLfromC3D("sample08/TESTCPI.c3d", "sample08/TESTCPI.xml")
+    generateXMLfromC3D("sample08/TESTDPI.c3d", "sample08/TESTDPI.xml")
+  }
 
 }
