@@ -83,7 +83,7 @@ object Tasks {
   )
   val fetchC3DTask = `fetch-c3d-example-files` := {
     println("Fetching example C3D files...")
-    val examples = Seq("sample08")
+    val examples = Seq("sample01", "sample08")
     for (example <- examples) {
       val srcString = "http://www.c3d.org/data/%s.zip" format example
       val dstString = "./c3d.org-example-files/%s/" format example
