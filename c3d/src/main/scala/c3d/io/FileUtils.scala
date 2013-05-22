@@ -4,7 +4,7 @@ import java.io.{DataInputStream, File, FileInputStream, IOException}
 import scala.collection.immutable._
 import scala.util.{Failure, Success, Try}
 
-object FileUtils {
+private [io] object FileUtils {
 
   /** Reads a `File` into an `IndexedSeq[Byte]`.
     * 

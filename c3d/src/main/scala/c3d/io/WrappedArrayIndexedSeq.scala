@@ -49,7 +49,7 @@ private [io] final class WrappedArrayIndexedSeq[T] private (array: Array[T], fro
 
 }
 
-object WrappedArrayIndexedSeq {
+private [io] object WrappedArrayIndexedSeq {
 
   /** Creates a new `WrappedArrayIndexedSeq`.
     * 

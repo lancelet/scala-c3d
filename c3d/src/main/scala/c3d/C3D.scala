@@ -46,7 +46,9 @@ object ProcessorType {
 trait C3D {
   def groups: Seq[Group]
   def processorType: ProcessorType = ProcessorType.Intel
-  def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]]
+  def getParameter[T:TypeTag](group: String, parameter: String, 
+    signed: ParameterSign = ParameterSign.Default,
+    signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
 }
 
 object C3D {

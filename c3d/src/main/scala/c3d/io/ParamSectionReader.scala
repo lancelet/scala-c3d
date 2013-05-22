@@ -71,7 +71,7 @@ private [io] object ParamSectionReader {
     def accum(blocks: Seq[FormattedByteIndexedSeq], rem: FormattedByteIndexedSeq): Seq[FormattedByteIndexedSeq] = {
       val nCharsInName = abs(rem(0))              // # of characters in the name
       val groupId = rem(1)                        // ID of the group (or the group to which a parameter belongs)
-      val offset = rem.uintAt(2 + nCharsInName)   // offset to the start of the next block (relative to its own index)
+      val offset = rem.uintAt(2 + nCharsInName) & 0xFFFF // offset to start of next block (relative to its own index)
       val byteOffset = offset + 2 + nCharsInName  // offset to the next block (relative to current block)
       if (offset == 0) {   // if the offset to the next block is zero, we terminate...
         if (groupId == 0)  // if the groupId of the current block is zero then we don't add the current block
@@ -124,8 +124,8 @@ private [io] object ParamSectionReader {
     * @param block parameter section block corresponding to a group
     */
   private [io] final class UnassociatedGroup(block: FormattedByteIndexedSeq) {
-    private val nName: Int = abs(block(0))     // # of characters in name
-    private val nDesc: Int = block(4 + nName)  // # of characters in description
+    private val nName: Int = abs(block(0))              // # of characters in name
+    private val nDesc: Int = block(4 + nName) & 0xFFFF  // # of characters in description
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
     def description: String = block.slice(5 + nName, 5 + nName + nDesc).map(_.toChar).mkString
     def id: Int = { assert(block(1) < 0); -block(1) }  // ID of a group must be negative
@@ -164,11 +164,11 @@ private [io] object ParamSectionReader {
     * @param block parameter section block corresponding to a parameter
     */
   private [io] final class UntypedParameter(val block: FormattedByteIndexedSeq) {
-    private def nName: Int = abs(block(0))                           // # of characters in name
-    private def nDesc: Int = block(6 + nName + nDims + data.length)  // # of characters in description
-    private def descOfs: Int = 7 + nName + nDims + data.length       // offset to the start of the description
-    private def nElem: Int = abs(byteLengthPerElement)               // number of bytes in an element of the data
-    private def nDims: Int = block(5 + nName)                        // number of dimensions
+    private def nName: Int = abs(block(0))                                    // # of characters in name
+    private def nDesc: Int = block(6 + nName + nDims + data.length) & 0xFFFF  // # of characters in description
+    private def descOfs: Int = 7 + nName + nDims + data.length                // offset to the start of the description
+    private def nElem: Int = abs(byteLengthPerElement)                        // # of bytes in an element of the data
+    private def nDims: Int = block(5 + nName)                                 // number of dimensions
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
     def description: String = block.slice(descOfs, descOfs + nDesc).map(_.toChar).mkString
     def groupId: Int = { assert(block(1) > 0); block(1) }
@@ -178,7 +178,7 @@ private [io] object ParamSectionReader {
       } else { // handle a normal array (can still be a "scalar", or a multi-dimensional array)
         new IndexedSeq[Int] {
           def length: Int = nDims
-          def apply(idx: Int): Int = block(6 + nName + idx)
+          def apply(idx: Int): Int = block(6 + nName + idx) & 0xFFFF
         }
       }
     }

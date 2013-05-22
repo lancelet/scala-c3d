@@ -7,7 +7,9 @@ import scala.collection.immutable._
   * @param is `IndexedSeq[Byte]` to wrap
   * @param bf [[BinaryFormat]] to use when reading ints, uints and floats
   */
-class FormattedByteIndexedSeq(is: IndexedSeq[Byte], val binaryFormat: BinaryFormat) extends IndexedSeq[Byte] {
+private [io] final class FormattedByteIndexedSeq(is: IndexedSeq[Byte], val binaryFormat: BinaryFormat) 
+    extends IndexedSeq[Byte] 
+{
   def length: Int = is.length
   def apply(byteIdx: Int): Byte = is(byteIdx)
   def intAt(byteIdx: Int): Int = binaryFormat.bytesToInt(is(byteIdx), is(byteIdx+1))

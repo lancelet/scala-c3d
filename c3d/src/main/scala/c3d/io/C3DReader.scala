@@ -1,7 +1,7 @@
 package c3d.io
 
 import java.io.File
-import c3d.{C3D, Group, Parameter, ProcessorType}
+import c3d.{C3D, Group, Parameter, ParameterSign, ParameterSignConventions, ProcessorType}
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
@@ -56,7 +56,9 @@ object C3DReader {
   /** Concrete case-class implementation of a C3D top-level object. */
   private [io] final case class ReadC3D(groups: Seq[Group], override val processorType: ProcessorType) extends C3D {
 
-    def getParameter[T:TypeTag](group: String, parameter: String): Option[Parameter[T]] = {
+    def getParameter[T:TypeTag](group: String, parameter: String,
+      signed: ParameterSign, signConventions: ParameterSignConventions): Option[Parameter[T]] = 
+    {
       groups.find { // find the named group
         _.name.toUpperCase == group.toUpperCase
       } flatMap { g: Group => // find the named parameter
@@ -69,6 +71,15 @@ object C3DReader {
             if (typeOf[T] == typeOf[String]) {  // special handling for strings
               val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
               Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
+            } else if (typeOf[T] == typeOf[Int]) {  // special handling for signed vs unsigned ints
+              val sign: ParameterSign = {
+                if (signed == ParameterSign.Default) signConventions.signForParameter(group, parameter) else signed
+              }
+              assert(sign != ParameterSign.Default, "Default parameter sign found: bad ParameterSignConventions")
+              if (sign == ParameterSign.Signed) 
+                Some(p.asInstanceOf[Parameter[T]])
+              else
+                Some((new UIntParameter(p.asInstanceOf[Parameter[Int]])).asInstanceOf[Parameter[T]])
             } else {
               Some(p.asInstanceOf[Parameter[T]])
             }

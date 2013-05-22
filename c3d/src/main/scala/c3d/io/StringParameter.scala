@@ -1,7 +1,6 @@
 package c3d.io
 
 import scala.collection.immutable._
-import scala.reflect.runtime.universe._
 import c3d.Parameter
 
 /** Converts a [[Parameter[Char]]] to a [[Parameter[String]]].
@@ -11,7 +10,9 @@ import c3d.Parameter
   * 
   * @param charParam character parameter to convert into a string parameter
   */
-final case class StringParameter(charParam: Parameter[Char]) extends Parameter[String] with ParameterTemplate[String] {
+private [io] final case class StringParameter(charParam: Parameter[Char]) 
+    extends Parameter[String] with ParameterTemplate[String] 
+{
   def name: String = charParam.name
   def description: String = charParam.description
   def isLocked: Boolean = charParam.isLocked
