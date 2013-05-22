@@ -24,8 +24,11 @@ object GenerateReference {
              |Options:
              |""".stripMargin)
     footer("Copyright (C) Jonathan Merritt 2013")
+    val sample01 = toggle("sample01", default=Some(false), noshort=true,
+      descrYes="Generates reference XML files for the sample01 C3D files",
+      descrNo="  [OFF BY DEFAULT]")
     val sample08 = toggle("sample08", default=Some(false), noshort=true,
-      descrYes="Generates reference XML file for the sample08 C3D files",
+      descrYes="Generates reference XML files for the sample08 C3D files",
       descrNo="  [OFF BY DEFAULT]")
   }
 
@@ -35,10 +38,11 @@ object GenerateReference {
     val conf = new Conf(args)
 
     // someAction is the OR of all actions; if no action is specified then display the help string
-    val someAction: Boolean = conf.sample08()
+    val someAction: Boolean = conf.sample01() || conf.sample08()
     if (!someAction) conf.printHelp()
 
     // execute individual actions
+    if (conf.sample01()) generateSample01()
     if (conf.sample08()) generateSample08()
 
   }
@@ -64,6 +68,13 @@ object GenerateReference {
   /** Generates an XML file from a C3D file using the directories specified by [[fetchC3DFile]] and [[fetchXMLFile]]. */
   private def generateXMLfromC3D(c3dName: String, xmlName: String) = 
     C3D2XML.c3d2xml(fetchC3DFile(c3dName), fetchXMLFile(xmlName))
+
+  private def generateSample01() = {
+    def c3d2xml(name: String): String = s"${name.dropRight(4)}.xml"
+    val files: Seq[String] = Seq("Eb015pi.c3d", "Eb015pr.c3d", "Eb015si.c3d", "Eb015sr.c3d", "Eb015vi.c3d", 
+      "Eb015vr.c3d")
+    for (name <- files) generateXMLfromC3D(s"sample01/$name", s"sample01/${c3d2xml(name)}")
+  }
 
   /** Generates XML file for the Sample08 examples from c3d.org.
     * 
