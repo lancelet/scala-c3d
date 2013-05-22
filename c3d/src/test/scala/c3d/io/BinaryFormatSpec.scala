@@ -29,7 +29,7 @@ class BinaryFormatSpec extends FunSpec {
 
     it("should read DEC floating point numbers") {
       val bf = BinaryFormat.fromProcessorType(ProcessorType.DEC)
-      assert(bf.bytesToFloat(b(0xAA), b(0x3E), b(0xAB), b(0xAA)) === 0.0833333f)
+      assert(bf.bytesToFloat(b(0xAA), b(0x3E), b(0xAB), b(0xAA)) === 0.083333336f)
     }
 
     it("should read DEC signed integers (positive and negative)") {
@@ -48,7 +48,7 @@ class BinaryFormatSpec extends FunSpec {
 
     it("should read SGI floating point numbers") {
       val bf = BinaryFormat.fromProcessorType(ProcessorType.SGIMIPS)
-      assert(bf.bytesToFloat(b(0x3D), b(0xAA), b(0xAA), b(0xAB)) === 0.0833333f)
+      assert(bf.bytesToFloat(b(0x3D), b(0xAA), b(0xAA), b(0xAB)) === 0.083333336f)
     }
 
     it("should read SGI signed integers (positive and negative)") {

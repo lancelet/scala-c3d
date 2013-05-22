@@ -2,6 +2,7 @@ package c3d.io
 
 import scala.collection.immutable._
 import c3d.ProcessorType
+import Util.b
 
 /** Binary representation of `Float` and `Byte`. */
 private [io] trait BinaryFormat {
@@ -34,12 +35,15 @@ private [io] object BinaryFormat {
   /** Big-endian conversion of 2 bytes to `Int`. */
   private def bytesToUIntLittle(b0: Byte, b1: Byte): Int = (b0 & 0xFF) + ((b1 & 0xFF) << 8)
 
+  /** IEEE little-endian float. */
+  private def ieeeFloatLittle(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = {
+    val i = (b0 & 0xFF) | ((b1 & 0xFF) << 8) | ((b2 & 0xFF) << 16) | ((b3 & 0xFF) << 24)
+    java.lang.Float.intBitsToFloat(i)
+  }
+
   /** BinaryFormat used by Intel processors. */
   object Intel extends BinaryFormat {
-    def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = {
-      val i = (b0 & 0xFF) + ((b1 & 0xFF) << 8) + ((b2 & 0xFF) << 16) + ((b3 & 0xFF) << 24)
-      java.lang.Float.intBitsToFloat(i)
-    }
+    def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = ieeeFloatLittle(b0, b1, b2, b3)
     def bytesToInt(b0: Byte, b1: Byte): Int = bytesToIntLittle(b0, b1)
     def bytesToUInt(b0: Byte, b1: Byte): Int = bytesToUIntLittle(b0, b1)
   }
@@ -47,7 +51,8 @@ private [io] object BinaryFormat {
   /** BinaryFormat used by DEC processors. */
   object DEC extends BinaryFormat {
     def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = {
-      throw new NotImplementedError("TODO: NOT YET IMPLEMENTED") // TODO
+      val bf: Byte = if (b1 == b(0)) b(0) else b(1)
+      ieeeFloatLittle(b2, b3, b0, b(b1 - bf))
     }
     def bytesToInt(b0: Byte, b1: Byte): Int = bytesToIntLittle(b0, b1)
     def bytesToUInt(b0: Byte, b1: Byte): Int = bytesToUIntLittle(b0, b1)
@@ -55,9 +60,7 @@ private [io] object BinaryFormat {
 
   /** BinaryFormat used by SGIMIPS processors. */
   object SGIMIPS extends BinaryFormat {
-    def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = {
-      throw new NotImplementedError("TODO: NOT YET IMPLEMENTED") // TODO
-    }
+    def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = ieeeFloatLittle(b3, b2, b1, b0)  // swap order
     def bytesToInt(b0: Byte, b1: Byte): Int = bytesToIntLittle(b1, b0)    // swap b0, b1
     def bytesToUInt(b0: Byte, b1: Byte): Int = bytesToUIntLittle(b1, b0)  // swap b0, b1
   }
