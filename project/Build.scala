@@ -3,7 +3,7 @@ import Keys._
 
 object CommonBuildSettings {
   val buildVersion       = "0.1-SNAPSHOT"
-  val buildScalaVersion  = "2.10.1"
+  val buildScalaVersion  = "2.10.2"
   val buildScalacOptions = Seq.empty[String]
 
   val commonBuildSettings = Defaults.defaultSettings ++ Seq(
@@ -53,8 +53,8 @@ object Resolvers {
 }
 
 object Dependencies {
-  val scalalang    = "org.scala-lang" %  "scala-library" % "2.10.1"  // why is this required?
-  val scalareflect = "org.scala-lang" %  "scala-reflect" % "2.10.1"
+  val scalalang    = "org.scala-lang" %  "scala-library" % "2.10.2"  // why is this required?
+  val scalareflect = "org.scala-lang" %  "scala-reflect" % "2.10.2"
   val scalaz       = "org.scalaz"     %% "scalaz-core"   % "7.0.0"
   val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.M6-SNAP16" % "test"
   val scallop      = "org.rogach"     %% "scallop"       % "0.9.1"
