@@ -1,7 +1,7 @@
 package c3d.io
 
 import java.io.File
-import c3d.{C3D, Group, Parameter, ParameterSign, ParameterSignConventions, ProcessorType}
+import c3d.{C3D, ForcePlate, Group, Parameter, ParameterSign, ParameterSignConventions, ProcessorType, Vec3D}
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
@@ -67,18 +67,17 @@ object C3DReader {
       pointGroup: Group  <- groups.find(_.name.toUpperCase == "POINT")
       analogGroup: Group <- groups.find(_.name.toUpperCase == "ANALOG")
       pointStart: Int    <- pointGroup.getParameter[Int]("DATA_START").map(_(0))
-      pointRate: Int     <- pointGroup.getParameter[Int]("RATE").map(_(0))
+      pointRate: Float   <- pointGroup.getParameter[Float]("RATE").map(_(0))
       pointFrames: Int   <- pointGroup.getParameter[Int]("FRAMES").map(_(0))
       pointUsed: Int     <- pointGroup.getParameter[Int]("USED").map(_(0))
       pointScale: Float  <- pointGroup.getParameter[Float]("SCALE").map(_(0))
-      analogRate: Int    <- analogGroup.getParameter[Int]("RATE").map(_(0))
+      analogRate: Float  <- analogGroup.getParameter[Float]("RATE").map(_(0))
       analogUsed: Int    <- analogGroup.getParameter[Int]("USED").map(_(0))
     } yield {
       // figure out the total size of the data section
       val usesFloat: Boolean = pointScale < 0.0f  // when POINT:SCALE < 0 it indicates that a float format is used
       val itemSizeInBytes: Int = if (usesFloat) 2 else 4  // 2 bytes for ints, 4 bytes for floats
-      assert(analogRate % pointRate == 0, "POINT:RATE should divide evenly into ANALOG:RATE")
-      val nAnalogPer3DFrame: Int = analogRate / pointRate
+      val nAnalogPer3DFrame: Int = (analogRate / pointRate).toInt
       val ptPayloadPerFrame: Int = pointUsed * 4 * itemSizeInBytes
       val analogPayloadPerFrame: Int = nAnalogPer3DFrame * analogUsed * itemSizeInBytes
       val totalBytes = pointFrames * (ptPayloadPerFrame + analogPayloadPerFrame)
@@ -99,7 +98,9 @@ object C3DReader {
   }
 
   /** Concrete case-class implementation of a C3D top-level object. */
-  private [io] final case class ReadC3D(groups: Seq[Group], override val processorType: ProcessorType) extends C3D {
+  private [io] final case class ReadC3D(groups: Seq[Group], override val processorType: ProcessorType,
+    dataSection: FormattedByteIndexedSeq) extends C3D
+  {
 
     def getParameter[T:TypeTag](group: String, parameter: String,
       signed: ParameterSign, signConventions: ParameterSignConventions): Option[Parameter[T]] = 
@@ -111,8 +112,98 @@ object C3DReader {
       }
     }
 
-    def getAnalogChannel(index: Int): IndexedSeq[Float] = IndexedSeq.empty[Float] // TODO: Complete method
+    def getAnalogChannel(channelIndex: Int): IndexedSeq[Float] = {
+      require(channelIndex >= 0 && channelIndex < analogUsed)
+      new IndexedSeq[Float] {
+        private val scale: Float = analogGenScale * analogScale(channelIndex)
+        private val offset: Float = analogOffset(channelIndex)
+        def length: Int = totalAnalogSamples
+        def apply(index: Int): Float = {
+          val dataByteIndex: Int = ((dataStride * index) + 4 + channelIndex) * dataItemSize
+          if (usesFloat) {
+            // floating point values
+            (dataSection.floatAt(dataByteIndex) - offset) * scale
+          } else {
+            // integer values
+            if (analogFormat == "SIGNED") {
+              (dataSection.intAt(dataByteIndex) - offset) * scale
+            } else {
+              (dataSection.uintAt(dataByteIndex) - offset) * scale
+            }
+          }
+        }
+      }
+    }
 
+    def analogSamplingRate: Float = analogRate
+
+    def forcePlates: IndexedSeq[ForcePlate] = fPlates
+    private val fPlates: IndexedSeq[ForcePlate] = new IndexedSeq[ForcePlate] {
+      def length: Int = getParameter[Int]("FORCE_PLATFORM", "USED").map(_(0)).getOrElse(0)
+      def apply(i: Int): ForcePlate = new ForcePlate {
+        private val typ: Int = getPNoFail[Int]("FORCE_PLATFORM", "TYPE").apply(i)
+        assert(typ == 4, "Only type 4 force plates are supported so far.")
+        private val channels: Parameter[Int] = getPNoFail[Int]("FORCE_PLATFORM", "CHANNEL")
+        private val cFx: IndexedSeq[Float] = getAnalogChannel(channels(i, 0))
+        private val cFy: IndexedSeq[Float] = getAnalogChannel(channels(i, 1))
+        private val cFz: IndexedSeq[Float] = getAnalogChannel(channels(i, 2))
+        private val cMx: IndexedSeq[Float] = getAnalogChannel(channels(i, 3))
+        private val cMy: IndexedSeq[Float] = getAnalogChannel(channels(i, 4))
+        private val cMz: IndexedSeq[Float] = getAnalogChannel(channels(i, 5))
+        private val cm: Parameter[Float] = getPNoFail[Float]("FORCE_PLATFORM", "CAL_MATRIX")
+        private val m: IndexedSeq[IndexedSeq[Float]] = IndexedSeq(
+          IndexedSeq(cm(i,0,0), cm(i,0,1), cm(i,0,2), cm(i,0,3), cm(i,0,4), cm(i,0,5)),
+          IndexedSeq(cm(i,1,0), cm(i,1,1), cm(i,1,2), cm(i,1,3), cm(i,1,4), cm(i,1,5)),
+          IndexedSeq(cm(i,2,0), cm(i,2,1), cm(i,2,2), cm(i,2,3), cm(i,2,4), cm(i,2,5)),
+          IndexedSeq(cm(i,3,0), cm(i,3,1), cm(i,3,2), cm(i,3,3), cm(i,3,4), cm(i,3,5)),
+          IndexedSeq(cm(i,4,0), cm(i,4,1), cm(i,4,2), cm(i,4,3), cm(i,4,4), cm(i,4,5)),
+          IndexedSeq(cm(i,5,0), cm(i,5,1), cm(i,5,2), cm(i,5,3), cm(i,5,4), cm(i,5,5))
+        )
+        def getForceVector(sampleIndex: Int): Vec3D = new Vec3D {
+          val fvec: (Float, Float, Float) = {
+            val fx = cFx(sampleIndex)
+            val fy = cFy(sampleIndex)
+            val fz = cFz(sampleIndex)
+            val mx = cMx(sampleIndex)
+            val my = cMy(sampleIndex)
+            val mz = cMz(sampleIndex)
+            val mfx = m(0)(0)*fx + m(0)(1)*fy + m(0)(2)*fz + m(0)(3)*mx + m(0)(4)*my + m(0)(5)*mz
+            val mfy = m(1)(0)*fx + m(1)(1)*fy + m(1)(2)*fz + m(1)(3)*mx + m(1)(4)*my + m(1)(5)*mz
+            val mfz = m(2)(0)*fx + m(2)(1)*fy + m(2)(2)*fz + m(2)(3)*mx + m(2)(4)*my + m(2)(5)*mz
+            (mfx, mfy, mfz)
+          }
+          val x = fvec._1
+          val y = fvec._2
+          val z = fvec._3
+        }
+      }
+    }
+
+    // Retrieves parameters that are absolutely required
+    private def getPNoFail[T:TypeTag](group: String, parameter: String): Parameter[T] = {
+      getParameter[T](group, parameter).getOrElse {
+        // TODO: Replace with nicer exception
+        throw new IllegalArgumentException(
+          s"${group.toUpperCase}:${parameter.toUpperCase} parameter not found"
+        )
+      }
+    }
+    // parameters that should definitely be present
+    private lazy val pointScale:     Float  = getPNoFail[Float]("POINT", "SCALE").apply(0)
+    private lazy val pointRate:      Float  = getPNoFail[Float]("POINT", "RATE").apply(0)
+    private lazy val pointUsed:      Int    = getPNoFail[Int]("POINT", "USED").apply(0)
+    private lazy val analogRate:     Float  = getPNoFail[Int]("ANALOG", "RATE").apply(0)
+    private lazy val analogUsed:     Int    = getPNoFail[Int]("ANALOG", "USED").apply(0)
+    private lazy val analogGenScale: Float  = getPNoFail[Float]("ANALOG", "GEN_SCALE").apply(0)
+    private lazy val analogFormat:   String = getPNoFail[String]("ANALOG", "FORMAT").apply(0)
+    private lazy val analogScale: Parameter[Float] = getPNoFail[Float]("ANALOG", "SCALE")
+    private lazy val analogOffset: Parameter[Float] = getPNoFail[Float]("ANALOG", "OFFSET") // TODO: OFFSET CAN BE INT
+    // things derived from the parameters
+    private lazy val usesFloat: Boolean = pointScale < 0.0
+    private lazy val dataItemSize: Int = if (usesFloat) 4 else 2
+    private lazy val analogSamplesPer3DFrame: Int = (analogRate / pointRate).toInt
+    private lazy val dataStride: Int = (pointUsed * 4 + analogSamplesPer3DFrame * analogUsed) * dataItemSize
+    private lazy val totalAnalogSamples: Int = analogSamplesPer3DFrame * pointUsed
   }
 
   /** Reads a C3D file from a `File`.
@@ -137,13 +228,20 @@ object C3DReader {
     val paramSecISeqV = paramSectionIndexedSeq(c3dISeq)
     val processorTypeV = paramSecISeqV flatMap { ParamSectionReader.processorType _ }
     val groupsV = paramSecISeqV flatMap { ParamSectionReader.read _ }
+    val dataSecV: Validation[String, FormattedByteIndexedSeq] = 
+      processorTypeV flatMap { processorType =>
+        groupsV flatMap { groups =>
+          dataSectionIndexedSeq(c3dISeq, groups, processorType)
+        }
+      }
 
     // assemble the C3D object
     for {
       groups: Seq[Group] <- groupsV
       processorType: ProcessorType <- processorTypeV
+      data: FormattedByteIndexedSeq <- dataSecV
     } yield {
-      ReadC3D(groups, processorType)
+      ReadC3D(groups, processorType, data)
     }
   }
 

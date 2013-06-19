@@ -290,11 +290,11 @@ private [io] object ParamSectionReader {
               val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
               Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
             } else if (typeOf[T] == typeOf[Int]) { // special handling for signed vs unsigned ints
-              val  sign: ParameterSign = {
+              val sign: ParameterSign = {
                 if (signed == ParameterSign.Default) signConventions.signForParameter(name, parameter) else signed
               }
-              assert(signed != ParameterSign.Default, "Default parameter sign specified, but default value not found " +
-                " in ParameterSignConventions.")
+              assert(sign != ParameterSign.Default, "Default parameter sign specified, but default value not found" +
+                s" in ParameterSignConventions for ${name.toUpperCase}:${parameter.toUpperCase}.")
               if (sign == ParameterSign.Signed)
                 Some(p.asInstanceOf[Parameter[T]])
               else

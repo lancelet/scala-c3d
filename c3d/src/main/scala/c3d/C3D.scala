@@ -46,6 +46,17 @@ object ProcessorType {
   object SGIMIPS extends ProcessorType
 }
 
+trait Vec3D {
+  def x: Float
+  def y: Float
+  def z: Float
+  def mag: Float = math.sqrt(x*x + y*y + z*z).toFloat
+}
+
+trait ForcePlate {
+  def getForceVector(sampleIndex: Int): Vec3D
+}
+
 trait C3D {
   def groups: Seq[Group]
   def processorType: ProcessorType = ProcessorType.Intel
@@ -53,6 +64,8 @@ trait C3D {
     signed: ParameterSign = ParameterSign.Default,
     signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
   def getAnalogChannel(index: Int): IndexedSeq[Float]
+  def analogSamplingRate: Float
+  def forcePlates: IndexedSeq[ForcePlate]
 }
 
 object C3D {
