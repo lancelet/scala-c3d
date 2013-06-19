@@ -6,7 +6,7 @@ import scala.math.abs
 import scala.reflect.runtime.universe._
 import scalaz.{Failure, Success, Validation}
 import scalaz.std.AllInstances._
-import c3d.{Group, Parameter, ProcessorType}
+import c3d.{Group, Parameter, ParameterSign, ParameterSignConventions, ProcessorType}
 import Util.b
 
 private [io] object ParamSectionReader {
@@ -277,7 +277,39 @@ private [io] object ParamSectionReader {
     description: String, 
     isLocked:    Boolean, 
     parameters:  Seq[Parameter[_]]
-  ) extends Group
+  ) extends Group {
+
+    def getParameter[T:TypeTag](parameter: String, signed: ParameterSign = ParameterSign.Default,
+      signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]] =
+    {
+      parameters.find(_.name.toUpperCase == parameter.toUpperCase) flatMap { p: Parameter[_] =>
+        val expectedType: Option[Parameter.Type] = ParamSectionReader.typeToParameterType[T]
+        expectedType.flatMap { t =>
+          if (p.parameterType == t) {
+            if (typeOf[T] == typeOf[String]) { // special handling for strings
+              val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
+              Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
+            } else if (typeOf[T] == typeOf[Int]) { // special handling for signed vs unsigned ints
+              val  sign: ParameterSign = {
+                if (signed == ParameterSign.Default) signConventions.signForParameter(name, parameter) else signed
+              }
+              assert(signed != ParameterSign.Default, "Default parameter sign specified, but default value not found " +
+                " in ParameterSignConventions.")
+              if (sign == ParameterSign.Signed)
+                Some(p.asInstanceOf[Parameter[T]])
+              else
+                Some((new UIntParameter(p.asInstanceOf[Parameter[Int]])).asInstanceOf[Parameter[T]])
+            } else {
+              Some(p.asInstanceOf[Parameter[T]])
+            }
+          } else {
+            None
+          }
+        }
+      }
+    }
+
+  }
 
   /** Concrete case-class implementation of a C3D Parameter. */
   private [io] final case class ReadParameter[T](

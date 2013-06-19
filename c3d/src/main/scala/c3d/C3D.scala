@@ -15,6 +15,7 @@ trait Parameter[T] {
   def apply(idx: IndexedSeq[Int]): T
   def parameterType: Parameter.Type
 
+  def apply(i0: Int): T
   def apply(i0: Int, i1: Int): T
   def apply(i0: Int, i1: Int, i2: Int): T
 }
@@ -34,6 +35,8 @@ trait Group {
   def description: String
   def isLocked: Boolean
   def parameters: Seq[Parameter[_]]
+  def getParameter[T:TypeTag](parameter: String, signed: ParameterSign = ParameterSign.Default,
+    signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
 }
 
 sealed trait ProcessorType
@@ -49,6 +52,7 @@ trait C3D {
   def getParameter[T:TypeTag](group: String, parameter: String, 
     signed: ParameterSign = ParameterSign.Default,
     signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
+  def getAnalogChannel(index: Int): IndexedSeq[Float]
 }
 
 object C3D {

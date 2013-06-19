@@ -53,6 +53,51 @@ object C3DReader {
     }
   }
 
+  /** Returns the `FormattedByteIndexedSeq` corresponding to the data (3D Point data + Analog data) section.
+    * 
+    * @param c3dISeq `IndexedSeq` corresponding to the entire C3D file
+    * @param groups `Seq` of `Group`s corresponding to the groups of parameters in the file
+    * @param processorType processor type for the file
+    * @return `IndexedSeq` containing entire data
+    */
+  private [io] def dataSectionIndexedSeq(c3dISeq: IndexedSeq[Byte], groups: Seq[Group], processorType: ProcessorType): 
+      Validation[String, FormattedByteIndexedSeq] = 
+  {
+    val optionResult: Option[FormattedByteIndexedSeq] = for {
+      pointGroup: Group  <- groups.find(_.name.toUpperCase == "POINT")
+      analogGroup: Group <- groups.find(_.name.toUpperCase == "ANALOG")
+      pointStart: Int    <- pointGroup.getParameter[Int]("DATA_START").map(_(0))
+      pointRate: Int     <- pointGroup.getParameter[Int]("RATE").map(_(0))
+      pointFrames: Int   <- pointGroup.getParameter[Int]("FRAMES").map(_(0))
+      pointUsed: Int     <- pointGroup.getParameter[Int]("USED").map(_(0))
+      pointScale: Float  <- pointGroup.getParameter[Float]("SCALE").map(_(0))
+      analogRate: Int    <- analogGroup.getParameter[Int]("RATE").map(_(0))
+      analogUsed: Int    <- analogGroup.getParameter[Int]("USED").map(_(0))
+    } yield {
+      // figure out the total size of the data section
+      val usesFloat: Boolean = pointScale < 0.0f  // when POINT:SCALE < 0 it indicates that a float format is used
+      val itemSizeInBytes: Int = if (usesFloat) 2 else 4  // 2 bytes for ints, 4 bytes for floats
+      assert(analogRate % pointRate == 0, "POINT:RATE should divide evenly into ANALOG:RATE")
+      val nAnalogPer3DFrame: Int = analogRate / pointRate
+      val ptPayloadPerFrame: Int = pointUsed * 4 * itemSizeInBytes
+      val analogPayloadPerFrame: Int = nAnalogPer3DFrame * analogUsed * itemSizeInBytes
+      val totalBytes = pointFrames * (ptPayloadPerFrame + analogPayloadPerFrame)
+
+      // snip out the section corresponding to all of the data
+      val startIndex: Int = (pointStart - 1) * 512
+      val slicedSequence: IndexedSeq[Byte] = c3dISeq.slice(startIndex, startIndex + totalBytes)
+
+      // convert to a FormattedByteIndexedSeq
+      val binaryFormat = BinaryFormat.fromProcessorType(processorType)
+      new FormattedByteIndexedSeq(slicedSequence, binaryFormat)
+    }
+    // convert to a scalaz.Validation
+    optionResult match {
+      case Some(r) => Success(r)
+      case None    => Failure("Could not retrieve data section.")
+    }
+  }
+
   /** Concrete case-class implementation of a C3D top-level object. */
   private [io] final case class ReadC3D(groups: Seq[Group], override val processorType: ProcessorType) extends C3D {
 
@@ -61,34 +106,12 @@ object C3DReader {
     {
       groups.find { // find the named group
         _.name.toUpperCase == group.toUpperCase
-      } flatMap { g: Group => // find the named parameter
-        g.parameters.find(_.name.toUpperCase == parameter.toUpperCase)
-      } flatMap { p: Parameter[_] => // check that the parameter type conforms with that expected
-        // handle string parameters by searching for a Parameter[Char] first
-        val expectedType: Option[Parameter.Type] = ParamSectionReader.typeToParameterType[T]
-        expectedType.flatMap { t =>
-          if (p.parameterType == t) {
-            if (typeOf[T] == typeOf[String]) {  // special handling for strings
-              val charParam: Parameter[Char] = p.asInstanceOf[Parameter[Char]]
-              Some(StringParameter(charParam).asInstanceOf[Parameter[T]])
-            } else if (typeOf[T] == typeOf[Int]) {  // special handling for signed vs unsigned ints
-              val sign: ParameterSign = {
-                if (signed == ParameterSign.Default) signConventions.signForParameter(group, parameter) else signed
-              }
-              assert(sign != ParameterSign.Default, "Default parameter sign found: bad ParameterSignConventions")
-              if (sign == ParameterSign.Signed) 
-                Some(p.asInstanceOf[Parameter[T]])
-              else
-                Some((new UIntParameter(p.asInstanceOf[Parameter[Int]])).asInstanceOf[Parameter[T]])
-            } else {
-              Some(p.asInstanceOf[Parameter[T]])
-            }
-          } else {
-            None
-          }
-        }
+      } flatMap { g: Group => 
+        g.getParameter[T](parameter, signed, signConventions)
       }
     }
+
+    def getAnalogChannel(index: Int): IndexedSeq[Float] = IndexedSeq.empty[Float] // TODO: Complete method
 
   }
 

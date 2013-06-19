@@ -47,6 +47,12 @@ private [io] trait ParameterTemplate[T] extends Parameter[T] {
     data(flatIndex)
   }
 
+  def apply(i0: Int): T = {
+    assert(dimensions.length == 1, "one-dimensional apply() called on a non-one-dimensional Parameter")
+    checkIndex(i0, 0);
+    data(i0)
+  }
+
   def apply(i0: Int, i1: Int): T = {
     assert(dimensions.length == 2, "two-dimensional apply() called on a non-two-dimensional Parameter")
     checkIndex(i0, 0); checkIndex(i1, 1)
