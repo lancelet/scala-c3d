@@ -203,7 +203,11 @@ object C3DReader {
     private lazy val dataItemSize: Int = if (usesFloat) 4 else 2
     private lazy val analogSamplesPer3DFrame: Int = (analogRate / pointRate).toInt
     private lazy val dataStride: Int = (pointUsed * 4 + analogSamplesPer3DFrame * analogUsed) * dataItemSize
-    private lazy val totalAnalogSamples: Int = analogSamplesPer3DFrame * pointUsed
+    private lazy val totalAnalogSamples: Int = {
+      val tas = analogSamplesPer3DFrame * pointUsed
+      println(s"totalAnalogSamples = $tas")
+      tas
+    }
   }
 
   /** Reads a C3D file from a `File`.
