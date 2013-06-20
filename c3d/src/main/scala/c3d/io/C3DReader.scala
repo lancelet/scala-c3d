@@ -76,7 +76,7 @@ object C3DReader {
     } yield {
       // figure out the total size of the data section
       val usesFloat: Boolean = pointScale < 0.0f  // when POINT:SCALE < 0 it indicates that a float format is used
-      val itemSizeInBytes: Int = if (usesFloat) 2 else 4  // 2 bytes for ints, 4 bytes for floats
+      val itemSizeInBytes: Int = if (usesFloat) 4 else 2  // 2 bytes for ints, 4 bytes for floats
       val nAnalogPer3DFrame: Int = (analogRate / pointRate).toInt
       val ptPayloadPerFrame: Int = pointUsed * 4 * itemSizeInBytes
       val analogPayloadPerFrame: Int = nAnalogPer3DFrame * analogUsed * itemSizeInBytes
