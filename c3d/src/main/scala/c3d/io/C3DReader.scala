@@ -192,6 +192,7 @@ object C3DReader {
     private lazy val pointScale:     Float  = getPNoFail[Float]("POINT", "SCALE").apply(0)
     private lazy val pointRate:      Float  = getPNoFail[Float]("POINT", "RATE").apply(0)
     private lazy val pointUsed:      Int    = getPNoFail[Int]("POINT", "USED").apply(0)
+    private lazy val pointFrames:    Int    = getPNoFail[Int]("POINT", "FRAMES").apply(0)
     private lazy val analogRate:     Float  = getPNoFail[Float]("ANALOG", "RATE").apply(0)
     private lazy val analogUsed:     Int    = getPNoFail[Int]("ANALOG", "USED").apply(0)
     private lazy val analogGenScale: Float  = getPNoFail[Float]("ANALOG", "GEN_SCALE").apply(0)
@@ -204,7 +205,7 @@ object C3DReader {
     private lazy val analogSamplesPer3DFrame: Int = (analogRate / pointRate).toInt
     private lazy val dataStride: Int = (pointUsed * 4 + analogSamplesPer3DFrame * analogUsed) * dataItemSize
     private lazy val totalAnalogSamples: Int = {
-      val tas = analogSamplesPer3DFrame * pointUsed
+      val tas = analogSamplesPer3DFrame * pointFrames
       println(s"totalAnalogSamples = $tas")
       tas
     }
