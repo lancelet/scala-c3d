@@ -197,7 +197,7 @@ object C3DReader {
     private lazy val analogGenScale: Float  = getPNoFail[Float]("ANALOG", "GEN_SCALE").apply(0)
     private lazy val analogFormat:   String = getPNoFail[String]("ANALOG", "FORMAT").apply(0)
     private lazy val analogScale: Parameter[Float] = getPNoFail[Float]("ANALOG", "SCALE")
-    private lazy val analogOffset: Parameter[Float] = getPNoFail[Float]("ANALOG", "OFFSET") // TODO: OFFSET CAN BE INT
+    private lazy val analogOffset: Parameter[Int] = getPNoFail[Int]("ANALOG", "OFFSET") // TODO: OFFSET CAN BE INT
     // things derived from the parameters
     private lazy val usesFloat: Boolean = pointScale < 0.0
     private lazy val dataItemSize: Int = if (usesFloat) 4 else 2
