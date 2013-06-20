@@ -119,7 +119,7 @@ object C3DReader {
         private val offset: Float = analogOffset(channelIndex)
         def length: Int = totalAnalogSamples
         def apply(index: Int): Float = {
-          val dataByteIndex: Int = ((dataStride * index) + 4 + channelIndex) * dataItemSize
+          val dataByteIndex: Int = (dataStride * index) + ((4 + channelIndex) * dataItemSize)
           if (usesFloat) {
             // floating point values
             (dataSection.floatAt(dataByteIndex) - offset) * scale
