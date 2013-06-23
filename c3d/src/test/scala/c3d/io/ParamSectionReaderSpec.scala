@@ -5,6 +5,7 @@ import c3d.{Group, Parameter, ProcessorType}
 import org.scalatest.FunSpec
 import scalaz.std.AllInstances._  // use Validation in for comprehensions
 import scala.reflect.runtime.universe._
+import Util.b
 
 class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
 
@@ -77,6 +78,7 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
         } yield {
           val params = paramBlocks.map(new UntypedParameter(_))
           assert(params.length === 37)
+
           val d = params(0)
           assert(d.name === "DESCRIPTIONS")
           assert(d.description === "  Point descriptions")
@@ -86,6 +88,16 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
           assert(d.data.length === 32 * 20)
           assert(d.data.slice(0, 13).map(_.toChar).mkString === "DIST/LAT FOOT")
           assert(d.isLocked === false)
+
+          val e = params(31)
+          assert(e.name === "FRAMES")
+          assert(e.description === "* Number of video frames")
+          assert(e.groupId === 1)
+          assert(e.dimensions === IndexedSeq(1))
+          assert(e.byteLengthPerElement === 2)
+          assert(e.data.length === 2)
+          assert(e.data === IndexedSeq(b(0xC2), b(0x01)))
+          assert(e.isLocked === true)
         }
         assert(testValidation.isSuccess)
       }
@@ -101,6 +113,7 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
         } yield {
           val params = paramBlocks.map(new UntypedParameter(_).asUnassociatedParameter)
           assert(params.length === 37)
+
           val d = params(0).asInstanceOf[UnassociatedParameter[Char]]
           assert(d.parameterType === Parameter.Type.Character)
           assert(d.name === "DESCRIPTIONS")
@@ -110,6 +123,16 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
           assert(d.data.length === 32 * 20)
           assert(d.data.slice(0, 13).mkString === "DIST/LAT FOOT")
           assert(d.isLocked === false)
+
+          val e = params(31).asInstanceOf[UnassociatedParameter[Int]]
+          assert(e.parameterType === Parameter.Type.Integer)
+          assert(e.name === "FRAMES")
+          assert(e.description === "* Number of video frames")
+          assert(e.groupId === 1)
+          assert(e.dimensions === IndexedSeq(1))
+          assert(e.data.length === 1)
+          assert(e.data === IndexedSeq(450))
+          assert(e.isLocked === true)
         }
         assert(testValidation.isSuccess)
       }

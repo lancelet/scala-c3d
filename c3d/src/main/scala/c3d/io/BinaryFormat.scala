@@ -30,7 +30,7 @@ private [io] trait BinaryFormat {
 private [io] object BinaryFormat {
 
   /** Little-endian conversion of 2 bytes to `Int`. */
-  private def bytesToIntLittle(b0: Byte, b1: Byte): Int = (b0.toInt) + (b1.toInt << 8)
+  private def bytesToIntLittle(b0: Byte, b1: Byte): Int = (b0 & 0xFF) + (b1.toInt << 8)
 
   /** Big-endian conversion of 2 bytes to `Int`. */
   private def bytesToUIntLittle(b0: Byte, b1: Byte): Int = (b0 & 0xFF) + ((b1 & 0xFF) << 8)

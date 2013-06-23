@@ -18,6 +18,7 @@ class BinaryFormatSpec extends FunSpec {
       // little-endian
       assert(bf.bytesToInt(b(0x0C), b(0xFF)) === -244)
       assert(bf.bytesToInt(b(0x36), b(0x07)) === 1846)
+      assert(bf.bytesToInt(b(0xC2), b(0x01)) ===  450)
     }
 
     it("should read Intel unsigned integers") {
@@ -25,6 +26,7 @@ class BinaryFormatSpec extends FunSpec {
       // little-endian
       assert(bf.bytesToUInt(b(0x0C), b(0xFF)) === 65292)
       assert(bf.bytesToUInt(b(0x36), b(0x07)) === 1846)
+      assert(bf.bytesToUInt(b(0xC2), b(0x01)) ===  450)
     }
 
     it("should read DEC floating point numbers") {
@@ -37,6 +39,7 @@ class BinaryFormatSpec extends FunSpec {
       // little-endian
       assert(bf.bytesToInt(b(0x0C), b(0xFF)) === -244)
       assert(bf.bytesToInt(b(0x36), b(0x07)) === 1846)
+      assert(bf.bytesToInt(b(0xC2), b(0x01)) ===  450)
     }
 
     it("should read DEC unsigned integers") {
@@ -44,6 +47,7 @@ class BinaryFormatSpec extends FunSpec {
       // little-endian
       assert(bf.bytesToUInt(b(0x0C), b(0xFF)) === 65292)
       assert(bf.bytesToUInt(b(0x36), b(0x07)) === 1846)
+      assert(bf.bytesToUInt(b(0xC2), b(0x01)) ===  450)
     }
 
     it("should read SGI floating point numbers") {
@@ -56,6 +60,7 @@ class BinaryFormatSpec extends FunSpec {
       // big-endian
       assert(bf.bytesToInt(b(0xFF), b(0x0C)) === -244)
       assert(bf.bytesToInt(b(0x07), b(0x36)) === 1846)
+      assert(bf.bytesToInt(b(0x01), b(0xC2)) ===  450)
     }
 
     it("should read SGI unsigned integers") {
@@ -63,6 +68,7 @@ class BinaryFormatSpec extends FunSpec {
       // big-endian
       assert(bf.bytesToUInt(b(0xFF), b(0x0C)) === 65292)
       assert(bf.bytesToUInt(b(0x07), b(0x36)) === 1846)
+      assert(bf.bytesToUInt(b(0x01), b(0xC2)) ===  450)
     }
 
   }
