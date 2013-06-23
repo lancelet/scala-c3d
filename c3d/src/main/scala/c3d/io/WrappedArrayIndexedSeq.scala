@@ -32,7 +32,7 @@ private [io] final class WrappedArrayIndexedSeq[T] private (array: Array[T], fro
 
   def apply(idx: Int): T = {
     if (idx < 0 || idx >= length)
-      throw new IndexOutOfBoundsException(s"Index must be in the range: 0 <= index < ${length}")
+      throw new IndexOutOfBoundsException(s"Index must be in the range: 0 <= index < ${length}, but was ${idx}")
     else
       array(idx + from)
   }

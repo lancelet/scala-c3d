@@ -119,7 +119,11 @@ object C3DReader {
         private val offset: Float = analogOffset(channelIndex)
         def length: Int = totalAnalogSamples
         def apply(index: Int): Float = {
-          val dataByteIndex: Int = (dataStride * index) + ((4 + channelIndex) * dataItemSize)
+          assert((index >= 0) && (index < length), s"index must satisfy: 0 <= index < ${length}")
+          val closest3DFrame: Int = index / analogSamplesPer3DFrame
+          val rem: Int = index % analogSamplesPer3DFrame
+          val dataByteIndex: Int = (dataStride * closest3DFrame) + (4 * pointUsed * dataItemSize) + 
+            (analogStride * rem) + (channelIndex * dataItemSize)
           if (usesFloat) {
             // floating point values
             (dataSection.floatAt(dataByteIndex) - offset) * scale
@@ -144,20 +148,20 @@ object C3DReader {
         private val typ: Int = getPNoFail[Int]("FORCE_PLATFORM", "TYPE").apply(i)
         assert(typ == 4, "Only type 4 force plates are supported so far.")
         private val channels: Parameter[Int] = getPNoFail[Int]("FORCE_PLATFORM", "CHANNEL")
-        private val cFx: IndexedSeq[Float] = getAnalogChannel(channels(i, 0))
-        private val cFy: IndexedSeq[Float] = getAnalogChannel(channels(i, 1))
-        private val cFz: IndexedSeq[Float] = getAnalogChannel(channels(i, 2))
-        private val cMx: IndexedSeq[Float] = getAnalogChannel(channels(i, 3))
-        private val cMy: IndexedSeq[Float] = getAnalogChannel(channels(i, 4))
-        private val cMz: IndexedSeq[Float] = getAnalogChannel(channels(i, 5))
+        private val cFx: IndexedSeq[Float] = getAnalogChannel(channels(0,i) - 1)
+        private val cFy: IndexedSeq[Float] = getAnalogChannel(channels(1,i) - 1)
+        private val cFz: IndexedSeq[Float] = getAnalogChannel(channels(2,i) - 1)
+        private val cMx: IndexedSeq[Float] = getAnalogChannel(channels(3,i) - 1)
+        private val cMy: IndexedSeq[Float] = getAnalogChannel(channels(4,i) - 1)
+        private val cMz: IndexedSeq[Float] = getAnalogChannel(channels(5,i) - 1)
         private val cm: Parameter[Float] = getPNoFail[Float]("FORCE_PLATFORM", "CAL_MATRIX")
         private val m: IndexedSeq[IndexedSeq[Float]] = IndexedSeq(
-          IndexedSeq(cm(i,0,0), cm(i,0,1), cm(i,0,2), cm(i,0,3), cm(i,0,4), cm(i,0,5)),
-          IndexedSeq(cm(i,1,0), cm(i,1,1), cm(i,1,2), cm(i,1,3), cm(i,1,4), cm(i,1,5)),
-          IndexedSeq(cm(i,2,0), cm(i,2,1), cm(i,2,2), cm(i,2,3), cm(i,2,4), cm(i,2,5)),
-          IndexedSeq(cm(i,3,0), cm(i,3,1), cm(i,3,2), cm(i,3,3), cm(i,3,4), cm(i,3,5)),
-          IndexedSeq(cm(i,4,0), cm(i,4,1), cm(i,4,2), cm(i,4,3), cm(i,4,4), cm(i,4,5)),
-          IndexedSeq(cm(i,5,0), cm(i,5,1), cm(i,5,2), cm(i,5,3), cm(i,5,4), cm(i,5,5))
+          IndexedSeq(cm(0,0,i), cm(0,1,i), cm(0,2,i), cm(0,3,i), cm(0,4,i), cm(0,5,i)),
+          IndexedSeq(cm(1,0,i), cm(1,1,i), cm(1,2,i), cm(1,3,i), cm(1,4,i), cm(1,5,i)),
+          IndexedSeq(cm(2,0,i), cm(2,1,i), cm(2,2,i), cm(2,3,i), cm(2,4,i), cm(2,5,i)),
+          IndexedSeq(cm(3,0,i), cm(3,1,i), cm(3,2,i), cm(3,3,i), cm(3,4,i), cm(3,5,i)),
+          IndexedSeq(cm(4,0,i), cm(4,1,i), cm(4,2,i), cm(4,3,i), cm(4,4,i), cm(4,5,i)),
+          IndexedSeq(cm(5,0,i), cm(5,1,i), cm(5,2,i), cm(5,3,i), cm(5,4,i), cm(5,5,i))
         )
         def getForceVector(sampleIndex: Int): Vec3D = new Vec3D {
           val fvec: (Float, Float, Float) = {
@@ -167,10 +171,10 @@ object C3DReader {
             val mx = cMx(sampleIndex)
             val my = cMy(sampleIndex)
             val mz = cMz(sampleIndex)
-            val mfx = m(0)(0)*fx + m(0)(1)*fy + m(0)(2)*fz + m(0)(3)*mx + m(0)(4)*my + m(0)(5)*mz
-            val mfy = m(1)(0)*fx + m(1)(1)*fy + m(1)(2)*fz + m(1)(3)*mx + m(1)(4)*my + m(1)(5)*mz
-            val mfz = m(2)(0)*fx + m(2)(1)*fy + m(2)(2)*fz + m(2)(3)*mx + m(2)(4)*my + m(2)(5)*mz
-            (mfx, mfy, mfz)
+            val afx = m(0)(0)*fx + m(0)(1)*fy + m(0)(2)*fz + m(0)(3)*mx + m(0)(4)*my + m(0)(5)*mz
+            val afy = m(1)(0)*fx + m(1)(1)*fy + m(1)(2)*fz + m(1)(3)*mx + m(1)(4)*my + m(1)(5)*mz
+            val afz = m(2)(0)*fx + m(2)(1)*fy + m(2)(2)*fz + m(2)(3)*mx + m(2)(4)*my + m(2)(5)*mz
+            (afx, afy, afz)
           }
           val x = fvec._1
           val y = fvec._2
@@ -204,11 +208,8 @@ object C3DReader {
     private lazy val dataItemSize: Int = if (usesFloat) 4 else 2
     private lazy val analogSamplesPer3DFrame: Int = (analogRate / pointRate).toInt
     private lazy val dataStride: Int = (pointUsed * 4 + analogSamplesPer3DFrame * analogUsed) * dataItemSize
-    private lazy val totalAnalogSamples: Int = {
-      val tas = analogSamplesPer3DFrame * pointFrames
-      println(s"totalAnalogSamples = $tas")
-      tas
-    }
+    private lazy val analogStride: Int = analogUsed * dataItemSize
+    private lazy val totalAnalogSamples: Int = analogSamplesPer3DFrame * pointFrames
   }
 
   /** Reads a C3D file from a `File`.
