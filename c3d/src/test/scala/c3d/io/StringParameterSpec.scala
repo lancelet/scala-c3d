@@ -37,6 +37,20 @@ class StringParameterSpec extends FunSpec with C3DFileSource {
       assert(ptDescrStringParam.parameterType === Parameter.Type.String)
     }
 
+    it("should work even if the char parameter is empty (eg. SUBJECTS:LABEL_PREFIXES in MotionAnalysis)") {
+      val emptyCharParam: Parameter[Char] = new Parameter[Char] with ParameterTemplate[Char] {
+        val name: String = "LABEL_PREFIXES"
+        val description: String = "Marker label prefixes."
+        val isLocked: Boolean = false
+        val dimensions: IndexedSeq[Int] = IndexedSeq(0, 1)  // the problem lies here
+        val data: IndexedSeq[Char] = IndexedSeq.empty[Char]
+        val parameterType: Parameter.Type = Parameter.Type.Character
+      }
+      val emptyStringParam: Parameter[String] = new StringParameter(emptyCharParam)
+      assert(emptyStringParam.dimensions == IndexedSeq(0))
+      assert(emptyStringParam.data == IndexedSeq.empty[String])
+    }
+
   }
 
 }

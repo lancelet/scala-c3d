@@ -18,11 +18,19 @@ private [io] final case class StringParameter(charParam: Parameter[Char])
   def isLocked: Boolean = charParam.isLocked
   val dimensions: IndexedSeq[Int] = {
     val tail = charParam.dimensions.tail
-    if (tail.isEmpty) IndexedSeq(1) else tail
+    if (tail.isEmpty) {
+      IndexedSeq(1)
+    } else {
+      if (charParam.dimensions(0) == 0) IndexedSeq(0) else tail  // special handling for empty char parameter
+    }
   }
   def data: IndexedSeq[String] = {
-    assert(charParam.data.length % charParam.dimensions(0) == 0, "data cannot be divided into even chunks")
-    charParam.data.grouped(charParam.dimensions(0)).map(_.mkString).toIndexedSeq
+    if (charParam.dimensions(0) == 0) {  // special handling for empty char parameter
+      IndexedSeq.empty[String]
+    } else {
+      assert(charParam.data.length % charParam.dimensions(0) == 0, "character data cannot be divided into even chunks")
+      charParam.data.grouped(charParam.dimensions(0)).map(_.mkString).toIndexedSeq
+    }
   }
   val parameterType: Parameter.Type = Parameter.Type.String
 }
