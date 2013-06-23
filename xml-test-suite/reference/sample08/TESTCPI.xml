@@ -54,7 +54,7 @@
         <dimensions>
           <dim size="1"/>
         </dimensions>
-        <data><![CDATA[194]]></data>
+        <data><![CDATA[450]]></data>
 </parameter>
       <parameter 
       name="SCALE" description="* Point data scale factor" isLocked="true" type="float">
