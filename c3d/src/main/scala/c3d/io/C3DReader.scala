@@ -163,22 +163,30 @@ object C3DReader {
           IndexedSeq(cm(4,0,i), cm(4,1,i), cm(4,2,i), cm(4,3,i), cm(4,4,i), cm(4,5,i)),
           IndexedSeq(cm(5,0,i), cm(5,1,i), cm(5,2,i), cm(5,3,i), cm(5,4,i), cm(5,5,i))
         )
-        def getForceVector(sampleIndex: Int): Vec3D = new Vec3D {
-          val fvec: (Float, Float, Float) = {
-            val fx = cFx(sampleIndex)
-            val fy = cFy(sampleIndex)
-            val fz = cFz(sampleIndex)
-            val mx = cMx(sampleIndex)
-            val my = cMy(sampleIndex)
-            val mz = cMz(sampleIndex)
-            val afx = m(0)(0)*fx + m(0)(1)*fy + m(0)(2)*fz + m(0)(3)*mx + m(0)(4)*my + m(0)(5)*mz
-            val afy = m(1)(0)*fx + m(1)(1)*fy + m(1)(2)*fz + m(1)(3)*mx + m(1)(4)*my + m(1)(5)*mz
-            val afz = m(2)(0)*fx + m(2)(1)*fy + m(2)(2)*fz + m(2)(3)*mx + m(2)(4)*my + m(2)(5)*mz
-            (afx, afy, afz)
+        val force: IndexedSeq[Vec3D] = new IndexedSeq[Vec3D] {
+          def length: Int = totalAnalogSamples
+          def apply(idx: Int): Vec3D = {
+            val fvec: (Float, Float, Float) = {
+              val fx = cFx(idx)
+              val fy = cFy(idx)
+              val fz = cFz(idx)
+              val mx = cMx(idx)
+              val my = cMy(idx)
+              val mz = cMz(idx)
+              val afx = m(0)(0)*fx + m(0)(1)*fy + m(0)(2)*fz + m(0)(3)*mx + m(0)(4)*my + m(0)(5)*mz
+              val afy = m(1)(0)*fx + m(1)(1)*fy + m(1)(2)*fz + m(1)(3)*mx + m(1)(4)*my + m(1)(5)*mz
+              val afz = m(2)(0)*fx + m(2)(1)*fy + m(2)(2)*fz + m(2)(3)*mx + m(2)(4)*my + m(2)(5)*mz
+              (afx, afy, afz)
+            }
+            val xv = fvec._1
+            val yv = fvec._2
+            val zv = fvec._3
+            new Vec3D {
+              val x = xv
+              val y = yv
+              val z = zv
+            }
           }
-          val x = fvec._1
-          val y = fvec._2
-          val z = fvec._3
         }
       }
     }

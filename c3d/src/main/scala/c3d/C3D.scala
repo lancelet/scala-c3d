@@ -54,7 +54,7 @@ trait Vec3D {
 }
 
 trait ForcePlate {
-  def getForceVector(sampleIndex: Int): Vec3D
+  def force: IndexedSeq[Vec3D]
 }
 
 trait C3D {
