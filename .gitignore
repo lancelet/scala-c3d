@@ -3,3 +3,6 @@
 c3d.org-example-files
 project/target
 target
+*/.cache
+*/.classpath
+*/.project
