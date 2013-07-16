@@ -7,8 +7,8 @@ package c3d.io
   * @param actualFrom requested `from` value for the slice operation
   * @param actualUntil requested `until` value for the slice operation
   */
-private [io] final case class SliceException(allowedFrom: Int, allowedUntil: Int, actualFrom: Int, actualUntil: Int) 
-    extends RuntimeException
+final case class SliceException(allowedFrom: Int, allowedUntil: Int, actualFrom: Int, actualUntil: Int) 
+    extends C3DIOException
 {
   override def toString(): String = {
     s"permitted slice: [$allowedFrom, $allowedUntil], actual slice: [$actualFrom, $actualUntil]"

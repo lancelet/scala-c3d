@@ -11,28 +11,6 @@ import Util.b
 
 private [io] object ParamSectionReader {
 
-  /** Returns the [[ProcessorType]] from a parameter section.
-    * 
-    * The processor type is stored in the 4th byte of the parameter section (in the header), and this value is
-    * returned, after conversion to a [[ProcessorType]].
-    * 
-    * @param paramISeq `IndexedSeq[Byte]` corresponding to the parameter section
-    * @return [[ProcessorType]] used in the parameter section
-    */
-  private [io] def processorType(paramISeq: IndexedSeq[Byte]): Validation[String, ProcessorType] = {
-    try {
-      val processorByte: Byte = paramISeq(3)
-      ProcessorTypeIO.byteToProcessorType(processorByte) map {
-        Success(_)
-      } getOrElse {
-        Failure(f"unknown processor type byte $processorByte%d")
-      }
-    } catch {
-      case ioe: IndexOutOfBoundsException =>
-        Failure("parameter section too small to contain processor type byte")
-    }
-  }
-
   /** Splits the parameter section into blocks corresponding to groups and parameters.
     * 
     * The parameter section contains blocks of data, each of which corresponds to either a group or a parameter.

@@ -25,6 +25,9 @@ private [io] trait BinaryFormat {
     */
   def bytesToUInt(b0: Byte, b1: Byte): Int
 
+  /** The [[ProcessorType]] represented by this format. */
+  def processorType: ProcessorType
+  
 }
 
 private [io] object BinaryFormat {
@@ -46,6 +49,7 @@ private [io] object BinaryFormat {
     def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = ieeeFloatLittle(b0, b1, b2, b3)
     def bytesToInt(b0: Byte, b1: Byte): Int = bytesToIntLittle(b0, b1)
     def bytesToUInt(b0: Byte, b1: Byte): Int = bytesToUIntLittle(b0, b1)
+    val processorType = ProcessorType.Intel
   }
 
   /** BinaryFormat used by DEC processors. */
@@ -56,6 +60,7 @@ private [io] object BinaryFormat {
     }
     def bytesToInt(b0: Byte, b1: Byte): Int = bytesToIntLittle(b0, b1)
     def bytesToUInt(b0: Byte, b1: Byte): Int = bytesToUIntLittle(b0, b1)
+    val processorType = ProcessorType.DEC
   }
 
   /** BinaryFormat used by SGIMIPS processors. */
@@ -63,6 +68,7 @@ private [io] object BinaryFormat {
     def bytesToFloat(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Float = ieeeFloatLittle(b3, b2, b1, b0)  // swap order
     def bytesToInt(b0: Byte, b1: Byte): Int = bytesToIntLittle(b1, b0)    // swap b0, b1
     def bytesToUInt(b0: Byte, b1: Byte): Int = bytesToUIntLittle(b1, b0)  // swap b0, b1
+    val processorType = ProcessorType.SGIMIPS
   }
 
   /** Returns a [[BinaryFormat]] from a [[ProcessorType]]. */

@@ -2,7 +2,7 @@ package c3d.io
 
 import scala.collection.immutable._
 
-/** Pairs a [[BinaryFormat]] with an `IndexedSeq[Byte]` to allow easy reading of ints, uints and floats.
+/** Pairs a [[BinaryFormat]] with an `IndexedSeq[Byte]` to allow easy reading of C3D ints, uints and floats.
   * 
   * @param is `IndexedSeq[Byte]` to wrap
   * @param bf [[BinaryFormat]] to use when reading ints, uints and floats

@@ -19,17 +19,13 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should extract the parameter section blocks correctly") {
-      paramSectionIndexedSeq(Sample08.EB015PI).fold(
-        error => fail(),
-        pb => {
-          assert(pb.length === (9 * 512))
-          assert(pb(0)           === b(0x01))
-          assert(pb(1)           === b(0x50))
-          assert(pb(2)           === b(0x09))
-          assert(pb(3)           === b(0x54))
-          assert(pb(9 * 512 - 1) === b(0x00))
-        }
-      )
+      val pb = getParameterSection(Sample08.EB015PI)
+      assert(pb.length === (9 * 512))
+      assert(pb(0)           === b(0x01))
+      assert(pb(1)           === b(0x50))
+      assert(pb(2)           === b(0x09))
+      assert(pb(3)           === b(0x54))
+      assert(pb(9 * 512 - 1) === b(0x00))
     }
 
     it("should correctly read C3D file groups and parameters") {

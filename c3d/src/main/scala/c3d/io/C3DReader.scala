@@ -10,6 +10,7 @@ import Util.b
 
 object C3DReader {
 
+  
   /** Checks for a C3D file magic byte.
     * 
     * The second byte of all C3D files should be 0x50.  This function returns `true` if `iseq` has the correct byte,
@@ -19,40 +20,32 @@ object C3DReader {
     * @return true if the magic byte is present
     */
   private [io] def hasMagicByte(c3dISeq: IndexedSeq[Byte]): Boolean = (c3dISeq.length >= 2) && (c3dISeq(1) == b(0x50))
-
-  /** Returns the `FormattedByteIndexedSeq` containing the parameter section.
-    * 
-    * This method fetches a `FormattedByteIndexedSeq` which corresponds to the entire parameter section.
-    * Additionally, the method checks within the parameter section to find out the processor type being used.
-    * 
-    * The first byte of the file contains a 1-based offset to the start of the parameter section.  This offset is 
-    * specified as a multiple of 512-byte blocks.  Then, within the parameter section itself, the 3rd byte specifies 
-    * the total number of 512-byte parameter blocks in the file.  Within the parameter section header, the processor
-    * type is also specified.
-    * 
-    * @param c3dISeq entire C3D file
-    * @return parameter section `IndexedSeq[Byte]`
-    */
-  private [io] def paramSectionIndexedSeq(c3dISeq: IndexedSeq[Byte]): Validation[String, FormattedByteIndexedSeq] = {
-    try {
-      val paramSecByteOffset = (c3dISeq(0) - 1) * 512  // first byte of file is 1-based parameter section offset
-      val nParamSections = c3dISeq(paramSecByteOffset + 2)  // 3rd byte of parameter section = # of param sections
-      val until = paramSecByteOffset + 512 * nParamSections
-      val iseq = c3dISeq.slice(paramSecByteOffset, until) // pick out the param section
-      for {
-        processorType <- ParamSectionReader.processorType(iseq)
-      } yield {
-        val binaryFormat = BinaryFormat.fromProcessorType(processorType)
-        new FormattedByteIndexedSeq(iseq, binaryFormat)
-      }
-    } catch {
-      // most probable failure is an attempt to access indices outside of the bounds of the file, if any of the
-      //  pointers happen to be corrupted.
-      case ex @ (_:IndexOutOfBoundsException | _:SliceException) => 
-        Failure("could not return the portion of the file corresponding to the parameter section")
+  
+  
+  /** Size of a section in a C3D file = 512 bytes. */
+  private [io] final val sectionSize: Int = 512
+  
+  
+  /** Fetches the parameter section from the file. */
+  private [io] def getParameterSection(wholeFile: IndexedSeq[Byte]): FormattedByteIndexedSeq = {
+    
+    val section: IndexedSeq[Byte] = {
+      val ofs  = (wholeFile(0) - 1) * sectionSize  // first byte is 1-based offset of parameter section
+      val nsec = wholeFile(ofs + 2)                // 3rd byte of parameter section is the number of sections
+      val until = ofs + (sectionSize * nsec)
+      wholeFile.slice(ofs, until)
     }
+ 
+    val processorType: ProcessorType = ProcessorTypeIO.byteToProcessorType(section(3)).getOrElse(
+       throw C3DIOException("Unknown processor type byte.")
+    )
+    
+    val binaryFormat = BinaryFormat.fromProcessorType(processorType)
+    new FormattedByteIndexedSeq(section, binaryFormat)
+    
   }
-
+  
+  
   /** Returns the `FormattedByteIndexedSeq` corresponding to the data (3D Point data + Analog data) section.
     * 
     * @param c3dISeq `IndexedSeq` corresponding to the entire C3D file
@@ -239,20 +232,17 @@ object C3DReader {
     */
   def read(c3dISeq: IndexedSeq[Byte]): Validation[String, C3D] = {
     // read groups and parameters (the parameter section)
-    val paramSecISeqV = paramSectionIndexedSeq(c3dISeq)
-    val processorTypeV = paramSecISeqV flatMap { ParamSectionReader.processorType _ }
-    val groupsV = paramSecISeqV flatMap { ParamSectionReader.read _ }
+    val parameterSection = getParameterSection(c3dISeq)
+    val processorType    = parameterSection.binaryFormat.processorType
+    val groupsV = ParamSectionReader.read(parameterSection) 
     val dataSecV: Validation[String, FormattedByteIndexedSeq] = 
-      processorTypeV flatMap { processorType =>
         groupsV flatMap { groups =>
           dataSectionIndexedSeq(c3dISeq, groups, processorType)
         }
-      }
 
     // assemble the C3D object
     for {
       groups: Seq[Group] <- groupsV
-      processorType: ProcessorType <- processorTypeV
       data: FormattedByteIndexedSeq <- dataSecV
     } yield {
       ReadC3D(groups, processorType, data)

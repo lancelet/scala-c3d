@@ -70,6 +70,15 @@ class BinaryFormatSpec extends FunSpec {
       assert(bf.bytesToUInt(b(0x07), b(0x36)) === 1846)
       assert(bf.bytesToUInt(b(0x01), b(0xC2)) ===  450)
     }
+    
+    it("should correctly report processor types") {
+      val bfIntel   = BinaryFormat.fromProcessorType(ProcessorType.Intel)
+      val bfSGIMIPS = BinaryFormat.fromProcessorType(ProcessorType.SGIMIPS)
+      val bfDEC     = BinaryFormat.fromProcessorType(ProcessorType.DEC)
+      assert(bfIntel.processorType   == ProcessorType.Intel)
+      assert(bfSGIMIPS.processorType == ProcessorType.SGIMIPS)
+      assert(bfDEC.processorType     == ProcessorType.DEC)
+    }
 
   }
 
