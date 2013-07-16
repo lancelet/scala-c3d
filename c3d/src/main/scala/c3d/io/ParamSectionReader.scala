@@ -4,9 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable._
 import scala.math.abs
 import scala.reflect.runtime.universe._
-import scalaz.{Failure, Success, Validation}
-import scalaz.std.AllInstances._
-import c3d.{Group, Parameter, ParameterSign, ParameterSignConventions, ProcessorType}
+import c3d._
 import Util.b
 
 private [io] object ParamSectionReader {
@@ -36,8 +34,7 @@ private [io] object ParamSectionReader {
     * @param paramISeq the parameter section bytes
     * @return sequence of blocks corresponding to either groups or parameters
     */
-  private [io] def chunkGroupsAndParams(paramISeq: FormattedByteIndexedSeq): 
-      Validation[String, Seq[FormattedByteIndexedSeq]] =
+  private [io] def chunkGroupsAndParams(paramISeq: FormattedByteIndexedSeq): Seq[FormattedByteIndexedSeq] =
   {
     /** Tail-recursive accumulator to collect blocks.
       * 
@@ -61,13 +58,7 @@ private [io] object ParamSectionReader {
       }
     }
 
-    // Here we try to apply the accumulator.  Any failures are likely to be due to invalid offsets.
-    try {
-      Success(accum(Seq.empty[FormattedByteIndexedSeq], paramISeq.slice(4, paramISeq.length)))
-    } catch {
-      case ex @ (_:IndexOutOfBoundsException | _:SliceException) =>
-        Failure("could not chunk groups and parameters (probably an invalid offset)")
-    }
+    accum(Seq.empty[FormattedByteIndexedSeq], paramISeq.slice(4, paramISeq.length))
   }
 
 
@@ -90,6 +81,7 @@ private [io] object ParamSectionReader {
     blocks.partition(isGroup _)
   }
 
+  
   /** Unassociated group, without any connected parameters.
     * 
     * Normal [[Group]]s contain a sequence of parameters.  However, when reading groups from the file, they are
@@ -116,6 +108,7 @@ private [io] object ParamSectionReader {
     }
   }
 
+  
   /** Converts a type which may appear in a parameter to a [[Parameter.Type]].
     * 
     * Strings are converted to [[Parameter.Type.Character]].
@@ -132,6 +125,7 @@ private [io] object ParamSectionReader {
     case _ => None
   }
 
+  
   /** Untyped parameter, without a connected group.
     *
     * Normal [[Parameter]]s are contained as a sequence within their owning group.  However, when reading parameters
@@ -186,6 +180,7 @@ private [io] object ParamSectionReader {
     }
   }
 
+  
   /** Unassociated parameter, without a connected group, but with typing information.
     * 
     * Normal [[Parameter]]s are contained as a sequence within their owning group.  However, when reading parameters
@@ -249,6 +244,7 @@ private [io] object ParamSectionReader {
     }
   }
 
+  
   /** Concrete case-class implementation of a C3D Group. */
   private [io] final case class ReadGroup(
     name:        String, 
@@ -286,9 +282,10 @@ private [io] object ParamSectionReader {
         }
       }
     }
-
+    
   }
 
+  
   /** Concrete case-class implementation of a C3D Parameter. */
   private [io] final case class ReadParameter[T](
     name:          String, 
@@ -299,39 +296,75 @@ private [io] object ParamSectionReader {
     parameterType: Parameter.Type
   ) extends Parameter[T] with ParameterTemplate[T]
 
-  /** Reads in the entire parameter section.
-    * 
-    * @param paramISeq indexed sequence corresponding to the entire parameter section
-    * @return `Set[Group]` corresponding to the groups, containing parameters
-    */
-  private [io] def read(paramISeq: FormattedByteIndexedSeq): Validation[String, Seq[Group]] = {
-    try {
-      for {
-        (groupBlocks, paramBlocks) <- chunkGroupsAndParams(paramISeq).map(partitionToGroupsAndParams _)
-      } yield {
-        // construct unassociated groups and parameters (not connected to each other yet)
-        val uGroups = groupBlocks.map(new UnassociatedGroup(_))
-        val uParams = paramBlocks.map(new UntypedParameter(_).asUnassociatedParameter)
+  
+  /** Reads in the parameter section groups. */
+  private [io] def readGroups(paramISeq: FormattedByteIndexedSeq): Seq[Group] = {
+    
+    // find byte blocks corresponding with groups and parameters
+    val (groupBlocks, paramBlocks) = partitionToGroupsAndParams(chunkGroupsAndParams(paramISeq))
+    
+    // construct unassociated groups and parameters (not connected to each other yet)
+    val uGroups = groupBlocks.map(new UnassociatedGroup(_))
+    val uParams = paramBlocks.map(new UntypedParameter(_).asUnassociatedParameter)
 
-        // for each group, collect its associated parameters and build fully-nested structures
-        // when constructing ReadParameter, we take `dimensions` and `data`, and convert them to
-        //  wrapped arrays.  this removes any dependence upon the original WrappedArrayIndexedSeq
-        //  for the entire parameter block, getting rid of a possible memory leak.
-        val groupSeq: Seq[Group] = for (g <- uGroups) yield {
-          val paramSeq: Seq[Parameter[_]] = for (p <- uParams if (p.groupId == g.id)) yield
-            ReadParameter(p.name, p.description, p.isLocked, 
-              WrappedArrayIndexedSeq(p.dimensions.toArray), 
-              WrappedArrayIndexedSeq(p.data.toArray),
-              p.parameterType)
-          ReadGroup(g.name, g.description, g.isLocked, paramSeq)
-        }
-        groupSeq
-      }
-    } catch {
-      case ex @ (_:IndexOutOfBoundsException | _:SliceException) =>
-        Failure("a problem was encountered reading the parameter section")
+    // for each group, collect its associated parameters
+    def getParamsForGroup(g: UnassociatedGroup): Seq[Parameter[_]] = {
+      for (p <- uParams if p.groupId == g.id) yield ReadParameter(
+        p.name, p.description, p.isLocked,
+        WrappedArrayIndexedSeq(p.dimensions.toArray),
+        WrappedArrayIndexedSeq(p.data.toArray),
+        p.parameterType
+      )
     }
+    val groupSeq = for (g <- uGroups) yield ReadGroup(g.name, g.description, g.isLocked, getParamsForGroup(g))
+    
+    groupSeq
   }
 
+  
+  /** Concrete case-class implementation of a C3D ParameterSection. */
+  private[io] final case class ReadParameterSection(
+    val groups: Seq[Group],
+    val processorType: ProcessorType) extends ParameterSection {
+
+    def getParameter[T: TypeTag](
+      groupName: String,
+      parameterName: String,
+      signed: ParameterSign = ParameterSign.Default,
+      signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]] =
+      {
+        val groupNameUpper = groupName.toUpperCase
+        for {
+          group <- groups.find(_.name.toUpperCase == groupNameUpper)
+          param <- group.getParameter[T](parameterName, signed, signConventions)
+        } yield param
+      }
+
+    def requiredParameters: RequiredParameters = new RequiredParameters {
+      private def getRequiredParameter[T: TypeTag](groupName: String, parameterName: String): Parameter[T] = {
+        getParameter(groupName, parameterName).getOrElse(
+          throw RequiredParameterNotFoundException(groupName, parameterName))
+      }
+      private def getRequiredScalar[T: TypeTag](groupName: String, parameterName: String): T = {
+        getRequiredParameter(groupName, parameterName).apply(0)
+      }
+      lazy val pointDataStart: Int = getRequiredScalar[Int]("POINT", "DATA_START")
+      lazy val pointRate: Float = getRequiredScalar[Float]("POINT", "RATE")
+      lazy val pointFrames: Int = getRequiredScalar[Int]("POINT", "FRAMES")
+      lazy val pointUsed: Int = getRequiredScalar[Int]("POINT", "USED")
+      lazy val pointScale: Float = getRequiredScalar[Float]("POINT", "SCALE")
+      lazy val analogRate: Float = getRequiredScalar[Float]("ANALOG", "RATE")
+      lazy val analogUsed: Int = getRequiredScalar[Int]("ANALOG", "USED")
+    }
+
+  }
+  
+  
+  /** Read in the entire parameter section. */
+  private [io] def read(paramISeq: FormattedByteIndexedSeq): ParameterSection = {
+    val groups = readGroups(paramISeq)
+    ReadParameterSection(groups, paramISeq.binaryFormat.processorType)
+  }  
+  
 }
 

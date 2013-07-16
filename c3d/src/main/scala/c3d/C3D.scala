@@ -3,7 +3,6 @@ package c3d
 import java.io.File
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
-import scalaz.Validation
 
 trait Parameter[T] {
   def name: String
@@ -35,8 +34,31 @@ trait Group {
   def description: String
   def isLocked: Boolean
   def parameters: Seq[Parameter[_]]
-  def getParameter[T:TypeTag](parameter: String, signed: ParameterSign = ParameterSign.Default,
+  def getParameter[T: TypeTag](
+    parameter: String,
+    signed: ParameterSign = ParameterSign.Default,
     signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
+}
+
+trait RequiredParameters {
+  def pointDataStart: Int
+  def pointRate: Float
+  def pointFrames: Int
+  def pointUsed: Int
+  def pointScale: Float
+  def analogRate: Float
+  def analogUsed: Int
+}
+
+trait ParameterSection {
+  def groups: Seq[Group]
+  def processorType: ProcessorType
+  def getParameter[T: TypeTag](
+    groupName: String,
+    parameterName: String,
+    signed: ParameterSign = ParameterSign.Default,
+    signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
+  def requiredParameters: RequiredParameters
 }
 
 sealed trait ProcessorType
@@ -57,18 +79,13 @@ trait ForcePlate {
   def force: IndexedSeq[Vec3D]
 }
 
-trait C3D {
-  def groups: Seq[Group]
-  def processorType: ProcessorType = ProcessorType.Intel
-  def getParameter[T:TypeTag](group: String, parameter: String, 
-    signed: ParameterSign = ParameterSign.Default,
-    signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
+trait C3D extends ParameterSection {
   def getAnalogChannel(index: Int): IndexedSeq[Float]
   def analogSamplingRate: Float
   def forcePlates: IndexedSeq[ForcePlate]
 }
 
 object C3D {
-  def read(file: File): Validation[String, C3D] = c3d.io.C3DReader.read(file)
-  def read(c3dISeq: IndexedSeq[Byte]): Validation[String, C3D] = c3d.io.C3DReader.read(c3dISeq)
+  def read(file: File): C3D = c3d.io.C3DReader.read(file)
+  def read(c3dISeq: IndexedSeq[Byte]): C3D = c3d.io.C3DReader.read(c3dISeq)
 }

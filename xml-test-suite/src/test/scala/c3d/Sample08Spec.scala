@@ -11,35 +11,35 @@ class Sample08Spec extends FeatureSpec {
 
     scenario("EB015PI.c3d") {
       val refXML  = readFileToString(fetchXMLFile("sample08/EB015PI.xml"))
-      val readXML = c3d2xmlString(fetchC3DFile("sample08/EB015PI.c3d")).getOrElse(fail())
+      val readXML = c3d2xmlString(fetchC3DFile("sample08/EB015PI.c3d"))
       val diff = new Diff(refXML, readXML)
       assert(diff.similar())
     }
 
     scenario("TESTAPI.c3d") {
       val refXML  = readFileToString(fetchXMLFile("sample08/TESTAPI.xml"))
-      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTAPI.c3d")).getOrElse(fail())
+      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTAPI.c3d"))
       val diff = new Diff(refXML, readXML)
       assert(diff.similar())
     }
 
     scenario("TESTBPI.c3d") {
       val refXML  = readFileToString(fetchXMLFile("sample08/TESTBPI.xml"))
-      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTBPI.c3d")).getOrElse(fail())
+      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTBPI.c3d"))
       val diff = new Diff(refXML, readXML)
       assert(diff.similar())
     }
 
     scenario("TESTCPI.c3d") {
       val refXML  = readFileToString(fetchXMLFile("sample08/TESTCPI.xml"))
-      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTCPI.c3d")).getOrElse(fail())
+      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTCPI.c3d"))
       val diff = new Diff(refXML, readXML)
       assert(diff.similar())
     }
 
     scenario("TESTDPI.c3d") {
       val refXML  = readFileToString(fetchXMLFile("sample08/TESTDPI.xml"))
-      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTDPI.c3d")).getOrElse(fail())
+      val readXML = c3d2xmlString(fetchC3DFile("sample08/TESTDPI.c3d"))
       val diff = new Diff(refXML, readXML)
       assert(diff.similar())
     }

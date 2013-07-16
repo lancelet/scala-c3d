@@ -42,39 +42,35 @@ object C3D2XML {
   }
 
   /** Converts a C3D `File` to an XML `File`.
-    * 
+    *
     * This method is suitable for calling as a library function.
-    * 
+    *
     * @param c3dFile C3D input `File`
     * @param xmlFile XML output `File`
-    * 
-    * @return `Validation` of `Unit` for success and a `String` for failure.
     */
   def c3d2xml(c3dFile: File, xmlFile: File): Validation[String, Unit] = {
     // read the C3D file
-    C3D.read(c3dFile).flatMap { c3d =>
-      // generate xml tree
-      val xml: Elem = generateXML(c3d)
-      // save XML to file
-      saveXML(xmlFile, xml)
-    }
+    val c3d = C3D.read(c3dFile)
+    // generate xml tree
+    val xml: Elem = generateXML(c3d)
+    // save XML to file
+    saveXML(xmlFile, xml)
   }
 
   /** Converts a C3D `File` to an XML `String`.
-    * 
+    *
     * @param c3dFile C3D input `File`
-    * 
-    * @return `Validation` containing the XML `String`, or a `String` for failure.
+    *
+    * @return the XML `String`
     */
-  def c3d2xmlString(c3dFile: File): Validation[String, String] = {
+  def c3d2xmlString(c3dFile: File): String = {
     // read the C3D file
-    C3D.read(c3dFile).map { c3d =>
-      // generate xml tree
-      val xml: Elem = generateXML(c3d)
-      // generate the XML string
-      val xmlString = (new PrettyPrinter(80, 2)).format(xml)
-      xmlString
-    }
+    val c3d = C3D.read(c3dFile)
+    // generate xml tree
+    val xml: Elem = generateXML(c3d)
+    // generate the XML string
+    val xmlString = (new PrettyPrinter(80, 2)).format(xml)
+    xmlString
   }
 
   /** Generate XML tree for the C3D file.

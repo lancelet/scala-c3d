@@ -10,7 +10,7 @@ class StringParameterSpec extends FunSpec with C3DFileSource {
   describe("StringParameter") {
 
     it("should allow access to a parameter containing a single string") {
-      val c3d = C3D.read(Sample08.EB015PI).getOrElse(fail("Could not read Sample08.EB015PI"))
+      val c3d: C3D = C3D.read(Sample08.EB015PI)
       val unitsCharParam = c3d.getParameter[Char]("POINT", "UNITS").getOrElse(fail())
       val unitsStringParam = StringParameter(unitsCharParam)
       assert(unitsStringParam.name === "UNITS")
@@ -23,7 +23,7 @@ class StringParameterSpec extends FunSpec with C3DFileSource {
     }
 
     it("should allow access to a parameter containing multiple strings") {
-      val c3d = C3D.read(Sample08.EB015PI).getOrElse(fail("Could not read Sample08.EB015PI"))
+      val c3d: C3D = C3D.read(Sample08.EB015PI)
       val ptDescrCharParam = c3d.getParameter[Char]("POINT", "DESCRIPTIONS").getOrElse(fail())
       val ptDescrStringParam = StringParameter(ptDescrCharParam)
       assert(ptDescrStringParam.name === "DESCRIPTIONS")
