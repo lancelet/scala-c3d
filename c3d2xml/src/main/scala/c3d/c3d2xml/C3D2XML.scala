@@ -79,11 +79,29 @@ object C3D2XML {
     * @return XML element
     */
   private def generateXML(c3d: C3D): Elem = {
-    <c3d>{
-      generateGroups(c3d)
-    }</c3d>
+    <c3d>
+      { generateGroups(c3d) }
+      { generateAnalog(c3d) }
+    </c3d>
   }
 
+  /** Generate XML analog data. */
+  private def generateAnalog(c3d: C3D): Elem = {
+    <analog
+      samplingRate={c3d.analog.samplingRate.toString}
+      totalSamples={c3d.analog.totalSamples.toString}
+    >{
+      for (channel <- c3d.analog.channels) yield {
+        <channel
+          name={channel.name}
+          description={channel.description}
+        >{
+          PCData(channel.mkString(","))
+        }</channel>
+      }
+    }</analog>
+  }
+  
   /** Generate XML data for groups and parameters. */
   private def generateGroups(c3d: C3D): Elem = {
 
