@@ -356,9 +356,11 @@ private [io] object ParamSectionReader {
       lazy val analogRate: Float = getRequiredScalar[Float]("ANALOG", "RATE")
       lazy val analogUsed: Int = getRequiredScalar[Int]("ANALOG", "USED")
       lazy val analogGenScale: Float = getRequiredScalar[Float]("ANALOG", "GEN_SCALE")
-      lazy val analogFormat: String = getRequiredParameter[String]("ANALOG", "FORMAT").apply(0)
+      lazy val analogFormat: String = getParameter[String]("ANALOG", "FORMAT").map(_(0)).getOrElse("SIGNED")
       lazy val analogScale: Parameter[Float] = getRequiredParameter[Float]("ANALOG", "SCALE")
       lazy val analogOffset: Parameter[Int] = getRequiredParameter[Int]("ANALOG", "OFFSET")
+      lazy val analogLabels: Parameter[String] = getRequiredParameter[String]("ANALOG", "LABELS")
+      lazy val analogDescriptions: Parameter[String] = getRequiredParameter[String]("ANALOG", "DESCRIPTIONS")
     }
 
   }

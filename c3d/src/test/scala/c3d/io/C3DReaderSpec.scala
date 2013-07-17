@@ -4,7 +4,6 @@ import c3d.{C3D, Parameter}
 import org.scalatest.FunSpec
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
-import scalaz.std.AllInstances._
 import Util.b
 
 class C3DReaderSpec extends FunSpec with C3DFileSource {

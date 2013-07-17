@@ -52,6 +52,8 @@ trait RequiredParameters {
   def analogFormat: String
   def analogScale: Parameter[Float]
   def analogOffset: Parameter[Int]
+  def analogLabels: Parameter[String]
+  def analogDescriptions: Parameter[String]
 }
 
 trait ParameterSection {
@@ -77,6 +79,16 @@ trait Vec3D {
   def y: Float
   def z: Float
   def mag: Float = math.sqrt(x*x + y*y + z*z).toFloat
+}
+
+trait AnalogChannel extends IndexedSeq[Float] {
+  def name: String
+  def description: String
+}
+
+trait Analog {
+  def channels: IndexedSeq[AnalogChannel]
+  def getChannelByName(name: String): Option[AnalogChannel]
 }
 
 trait ForcePlate {
