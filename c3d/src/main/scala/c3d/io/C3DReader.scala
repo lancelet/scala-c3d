@@ -81,35 +81,8 @@ object C3DReader {
   {
 
     private val rp = parameterSection.requiredParameters
-    
-    def getAnalogChannel(channelIndex: Int): IndexedSeq[Float] = {
-      require(channelIndex >= 0 && channelIndex < rp.analogUsed)
-      new IndexedSeq[Float] {
-        private val scale: Float = rp.analogGenScale * rp.analogScale(channelIndex)
-        private val offset: Float = rp.analogOffset(channelIndex)
-        def length: Int = totalAnalogSamples
-        def apply(index: Int): Float = {
-          assert((index >= 0) && (index < length), s"index must satisfy: 0 <= index < ${length}")
-          val closest3DFrame: Int = index / analogSamplesPer3DFrame
-          val rem: Int = index % analogSamplesPer3DFrame
-          val dataByteIndex: Int = (dataStride * closest3DFrame) + (4 * rp.pointUsed * dataItemSize) + 
-            (analogStride * rem) + (channelIndex * dataItemSize)
-          if (usesFloat) {
-            // floating point values
-            (dataSection.floatAt(dataByteIndex) - offset) * scale
-          } else {
-            // integer values
-            if (rp.analogFormat == "SIGNED") {
-              (dataSection.intAt(dataByteIndex) - offset) * scale
-            } else {
-              (dataSection.uintAt(dataByteIndex) - offset) * scale
-            }
-          }
-        }
-      }
-    }
 
-    def analogSamplingRate: Float = rp.analogRate
+    val analog: Analog = AnalogReader(parameterSection, dataSection)
 
     def forcePlates: IndexedSeq[ForcePlate] = fPlates
     private val fPlates: IndexedSeq[ForcePlate] = new IndexedSeq[ForcePlate] {
@@ -118,12 +91,12 @@ object C3DReader {
         private val typ: Int = getPNoFail[Int]("FORCE_PLATFORM", "TYPE").apply(i)
         assert(typ == 4, "Only type 4 force plates are supported so far.")
         private val channels: Parameter[Int] = getPNoFail[Int]("FORCE_PLATFORM", "CHANNEL")
-        private val cFx: IndexedSeq[Float] = getAnalogChannel(channels(0,i) - 1)
-        private val cFy: IndexedSeq[Float] = getAnalogChannel(channels(1,i) - 1)
-        private val cFz: IndexedSeq[Float] = getAnalogChannel(channels(2,i) - 1)
-        private val cMx: IndexedSeq[Float] = getAnalogChannel(channels(3,i) - 1)
-        private val cMy: IndexedSeq[Float] = getAnalogChannel(channels(4,i) - 1)
-        private val cMz: IndexedSeq[Float] = getAnalogChannel(channels(5,i) - 1)
+        private val cFx: IndexedSeq[Float] = analog.channels(channels(0,i) - 1)
+        private val cFy: IndexedSeq[Float] = analog.channels(channels(1,i) - 1)
+        private val cFz: IndexedSeq[Float] = analog.channels(channels(2,i) - 1)
+        private val cMx: IndexedSeq[Float] = analog.channels(channels(3,i) - 1)
+        private val cMy: IndexedSeq[Float] = analog.channels(channels(4,i) - 1)
+        private val cMz: IndexedSeq[Float] = analog.channels(channels(5,i) - 1)
         private val cm: Parameter[Float] = getPNoFail[Float]("FORCE_PLATFORM", "CAL_MATRIX")
         private val m: IndexedSeq[IndexedSeq[Float]] = IndexedSeq(
           IndexedSeq(cm(0,0,i), cm(0,1,i), cm(0,2,i), cm(0,3,i), cm(0,4,i), cm(0,5,i)),
@@ -134,7 +107,7 @@ object C3DReader {
           IndexedSeq(cm(5,0,i), cm(5,1,i), cm(5,2,i), cm(5,3,i), cm(5,4,i), cm(5,5,i))
         )
         val force: IndexedSeq[Vec3D] = new IndexedSeq[Vec3D] {
-          def length: Int = totalAnalogSamples
+          def length: Int = analog.totalSamples
           def apply(idx: Int): Vec3D = {
             val fvec: (Float, Float, Float) = {
               val fx = cFx(idx)
@@ -170,23 +143,7 @@ object C3DReader {
         )
       }
     }
-    // things derived from the parameters
-    private lazy val usesFloat: Boolean = rp.pointScale < 0.0
-    private lazy val dataItemSize: Int = if (usesFloat) 4 else 2
-    private lazy val analogSamplesPer3DFrame: Int = (rp.analogRate / rp.pointRate).toInt
-    private lazy val dataStride: Int = (rp.pointUsed * 4 + analogSamplesPer3DFrame * rp.analogUsed) * dataItemSize
-    private lazy val analogStride: Int = rp.analogUsed * dataItemSize
-    private lazy val totalAnalogSamples: Int = analogSamplesPer3DFrame * rp.pointFrames
 
-    def getParameter[T: TypeTag](
-        groupName: String, 
-        parameterName: String, 
-        signed: c3d.ParameterSign,
-        signConventions: c3d.ParameterSignConventions): Option[c3d.Parameter[T]] = 
-          parameterSection.getParameter(groupName, parameterName, signed, signConventions)
-    def groups: scala.collection.immutable.Seq[c3d.Group] = parameterSection.groups
-    def processorType: c3d.ProcessorType = parameterSection.processorType
-    def requiredParameters: RequiredParameters = parameterSection.requiredParameters
   }
 
   /** Reads a C3D file from a `File`.

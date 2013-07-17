@@ -90,6 +90,7 @@ trait Analog {
   def channels: IndexedSeq[AnalogChannel]
   def getChannelByName(name: String): Option[AnalogChannel]
   def samplingRate: Float
+  def totalSamples: Int
 }
 
 trait ForcePlate {
@@ -98,8 +99,7 @@ trait ForcePlate {
 
 trait C3D {
   def parameterSection: ParameterSection
-  def getAnalogChannel(index: Int): IndexedSeq[Float]
-  def analogSamplingRate: Float
+  def analog: Analog
   def forcePlates: IndexedSeq[ForcePlate]
 }
 

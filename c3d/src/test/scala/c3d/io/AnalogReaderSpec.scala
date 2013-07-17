@@ -59,6 +59,7 @@ class AnalogReaderSpec extends FunSpec with C3DFileSource {
     it("should correctly find the length of each channel (Sample08.EB015PI)") {
       val analogSamples: Int = 1800
       for (channel <- analogReader(Sample08.EB015PI).channels) assert(channel.length === analogSamples)
+      assert(analogReader(Sample08.EB015PI).totalSamples === analogSamples)
     }
     
     it("should contain correct analog channel samples (Sample08.EB015PI)") {
