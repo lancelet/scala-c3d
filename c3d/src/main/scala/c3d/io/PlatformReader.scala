@@ -19,6 +19,11 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
       DefaultVec3D(op(0, plateIndex), op(1, plateIndex), op(2, plateIndex))
     }
     
+    val corners: IndexedSeq[Vec3D] = {
+      val cp: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "CORNERS")
+      for (i <- 0 until 4) yield DefaultVec3D(cp(0, i, plateIndex), cp(1, i, plateIndex), cp(2, i, plateIndex))
+    }
+    
   }
   
   
