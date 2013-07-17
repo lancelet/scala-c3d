@@ -4,8 +4,6 @@ import java.io.File
 import c3d._
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
-import scalaz.{Failure, Success, Validation}
-import scalaz.std.AllInstances._
 import Util.b
 
 object C3DReader {
@@ -45,6 +43,7 @@ object C3DReader {
     
   }
 
+  
   /** Fetches the data section of the file (3D point data + analog data). */
   private[io] def getDataSection(
     wholeFile: IndexedSeq[Byte],
@@ -86,8 +85,8 @@ object C3DReader {
     def getAnalogChannel(channelIndex: Int): IndexedSeq[Float] = {
       require(channelIndex >= 0 && channelIndex < rp.analogUsed)
       new IndexedSeq[Float] {
-        private val scale: Float = analogGenScale * analogScale(channelIndex)
-        private val offset: Float = analogOffset(channelIndex)
+        private val scale: Float = rp.analogGenScale * rp.analogScale(channelIndex)
+        private val offset: Float = rp.analogOffset(channelIndex)
         def length: Int = totalAnalogSamples
         def apply(index: Int): Float = {
           assert((index >= 0) && (index < length), s"index must satisfy: 0 <= index < ${length}")
@@ -100,7 +99,7 @@ object C3DReader {
             (dataSection.floatAt(dataByteIndex) - offset) * scale
           } else {
             // integer values
-            if (analogFormat == "SIGNED") {
+            if (rp.analogFormat == "SIGNED") {
               (dataSection.intAt(dataByteIndex) - offset) * scale
             } else {
               (dataSection.uintAt(dataByteIndex) - offset) * scale
@@ -171,11 +170,6 @@ object C3DReader {
         )
       }
     }
-    // parameters that should definitely be present
-    private lazy val analogGenScale: Float  = getPNoFail[Float]("ANALOG", "GEN_SCALE").apply(0)
-    private lazy val analogFormat:   String = getPNoFail[String]("ANALOG", "FORMAT").apply(0)
-    private lazy val analogScale: Parameter[Float] = getPNoFail[Float]("ANALOG", "SCALE")
-    private lazy val analogOffset: Parameter[Int] = getPNoFail[Int]("ANALOG", "OFFSET") // TODO: OFFSET CAN BE INT
     // things derived from the parameters
     private lazy val usesFloat: Boolean = rp.pointScale < 0.0
     private lazy val dataItemSize: Int = if (usesFloat) 4 else 2

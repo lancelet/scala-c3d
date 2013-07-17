@@ -48,6 +48,10 @@ trait RequiredParameters {
   def pointScale: Float
   def analogRate: Float
   def analogUsed: Int
+  def analogGenScale: Float
+  def analogFormat: String
+  def analogScale: Parameter[Float]
+  def analogOffset: Parameter[Int]
 }
 
 trait ParameterSection {
