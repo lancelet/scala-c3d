@@ -41,20 +41,21 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
       val fplocNames = Seq("OBJ", "MAX", "INT")
       val subjNames = Seq("NAME", "NUMBER", "PROJECT", "WEIGHT", "HEIGHT", "GENDER", "DATE_OF_BIRTH", "TARGET_RADIUS")
       // group and parameter names
-      assert(c3d.groups.map(_.name) === groupNames)
-      assert(c3d.groups.find(_.name == "POINT").get.parameters.map(_.name) === pointNames)
-      assert(c3d.groups.find(_.name == "ANALOG").get.parameters.map(_.name) === analogNames)
-      assert(c3d.groups.find(_.name == "FORCE_PLATFORM").get.parameters.map(_.name) === fpNames)
-      assert(c3d.groups.find(_.name == "FPLOC").get.parameters.map(_.name) === fplocNames)
-      assert(c3d.groups.find(_.name == "SUBJECT").get.parameters.map(_.name) === subjNames)
+      val ps = c3d.parameterSection
+      assert(ps.groups.map(_.name) === groupNames)
+      assert(ps.groups.find(_.name == "POINT").get.parameters.map(_.name) === pointNames)
+      assert(ps.groups.find(_.name == "ANALOG").get.parameters.map(_.name) === analogNames)
+      assert(ps.groups.find(_.name == "FORCE_PLATFORM").get.parameters.map(_.name) === fpNames)
+      assert(ps.groups.find(_.name == "FPLOC").get.parameters.map(_.name) === fplocNames)
+      assert(ps.groups.find(_.name == "SUBJECT").get.parameters.map(_.name) === subjNames)
     }
 
     it("should allow typed access to groups and parameters via getParameter") {
       val c3d = C3DReader.read(Sample08.EB015PI)
       // should fail to get a parameter of the wrong type
-      assert(c3d.getParameter[Int]("Point", "x_screen").isEmpty, "should not find X_SCREEN as an Int")
+      assert(c3d.parameterSection.getParameter[Int]("Point", "x_screen").isEmpty, "should not find X_SCREEN as an Int")
       // should succeed if the parameter is the correct type
-      val xScreenO = c3d.getParameter[Char]("Point", "x_screen")
+      val xScreenO = c3d.parameterSection.getParameter[Char]("Point", "x_screen")
       assert(xScreenO.isDefined, "X_SCREEN parameter should have been found")
       xScreenO map { xScreen =>
         assert(xScreen.name === "X_SCREEN")
@@ -68,7 +69,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
 
     it("should index multi-dimensional parameters correctly") {
       val c3d = C3DReader.read(Sample08.EB015PI)
-      val pl: Parameter[Char] = c3d.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
+      val pl: Parameter[Char] = c3d.parameterSection.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
       // check for an error if the sequence is the wrong size
       intercept[IllegalArgumentException] { pl(IndexedSeq(0, 0, 0)) }
       intercept[IllegalArgumentException] { pl(IndexedSeq(0)) }
@@ -84,7 +85,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
 
     it("should index multi-dimensional params through utility apply() methods") {
       val c3d: C3D = C3DReader.read(Sample08.EB015PI)
-      val pl: Parameter[Char] = c3d.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
+      val pl: Parameter[Char] = c3d.parameterSection.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
       // check for an error if indices are wrong
       intercept[IndexOutOfBoundsException] { pl(4, 0) }
       intercept[IndexOutOfBoundsException] { pl(0, 48) }
@@ -103,9 +104,9 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     it("should read string parameters") {
       val c3d: C3D = C3DReader.read(Sample08.EB015PI)
       // should fail on non-String parameters
-      assert(c3d.getParameter[String]("POINT", "DATA_START").isEmpty)
+      assert(c3d.parameterSection.getParameter[String]("POINT", "DATA_START").isEmpty)
       // should succeed on string parameters
-      val pd = c3d.getParameter[String]("POINT", "DESCRIPTIONS").getOrElse(fail())
+      val pd = c3d.parameterSection.getParameter[String]("POINT", "DESCRIPTIONS").getOrElse(fail())
       assert(pd(IndexedSeq(1)).trim === "INSTEP")
     }
 

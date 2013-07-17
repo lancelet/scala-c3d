@@ -101,10 +101,10 @@ object C3D2XML {
     def dims(dims: Seq[Int]): Elem = <dimensions>{ for (d <- dims) yield <dim size={d.toString}/> }</dimensions>
 
     def charData(group: String, param: String): PCData = 
-      PCData(c3d.getParameter[String](group, param).get.data.mkString)
+      PCData(c3d.parameterSection.getParameter[String](group, param).get.data.mkString)
 
     def byteData(group: String, param: String): PCData = 
-      PCData(c3d.getParameter[Byte](group, param).get.data.map(b => f"0x$b%02X").mkString(","))
+      PCData(c3d.parameterSection.getParameter[Byte](group, param).get.data.map(b => f"0x$b%02X").mkString(","))
 
     def paramData(g: Group, p: Parameter[_]): PCData = {
       assert(g.parameters contains p)
@@ -132,7 +132,7 @@ object C3D2XML {
     }
 
     <groups>{
-      for (group <- c3d.groups) yield {
+      for (group <- c3d.parameterSection.groups) yield {
         <group 
           name={group.name}
           description={group.description}

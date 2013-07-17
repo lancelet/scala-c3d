@@ -83,7 +83,8 @@ trait ForcePlate {
   def force: IndexedSeq[Vec3D]
 }
 
-trait C3D extends ParameterSection {
+trait C3D {
+  def parameterSection: ParameterSection
   def getAnalogChannel(index: Int): IndexedSeq[Float]
   def analogSamplingRate: Float
   def forcePlates: IndexedSeq[ForcePlate]

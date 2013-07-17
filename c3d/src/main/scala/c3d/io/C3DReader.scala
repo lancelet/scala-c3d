@@ -113,7 +113,7 @@ object C3DReader {
 
     def forcePlates: IndexedSeq[ForcePlate] = fPlates
     private val fPlates: IndexedSeq[ForcePlate] = new IndexedSeq[ForcePlate] {
-      def length: Int = getParameter[Int]("FORCE_PLATFORM", "USED").map(_(0)).getOrElse(0)
+      def length: Int = parameterSection.getParameter[Int]("FORCE_PLATFORM", "USED").map(_(0)).getOrElse(0)
       def apply(i: Int): ForcePlate = new ForcePlate {
         private val typ: Int = getPNoFail[Int]("FORCE_PLATFORM", "TYPE").apply(i)
         assert(typ == 4, "Only type 4 force plates are supported so far.")
@@ -163,7 +163,7 @@ object C3DReader {
 
     // Retrieves parameters that are absolutely required
     private def getPNoFail[T:TypeTag](group: String, parameter: String): Parameter[T] = {
-      getParameter[T](group, parameter).getOrElse {
+      parameterSection.getParameter[T](group, parameter).getOrElse {
         // TODO: Replace with nicer exception
         throw new IllegalArgumentException(
           s"${group.toUpperCase}:${parameter.toUpperCase} parameter not found"
