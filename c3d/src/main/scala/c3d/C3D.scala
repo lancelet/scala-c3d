@@ -79,6 +79,9 @@ trait Vec3D {
   def y: Float
   def z: Float
   def mag: Float = math.sqrt(x*x + y*y + z*z).toFloat
+  def cross(v: Vec3D): Vec3D = ???
+  def +(v: Vec3D): Vec3D = ???
+  def -(v: Vec3D): Vec3D = ???
 }
 
 trait AnalogChannel extends IndexedSeq[Float] {
@@ -93,14 +96,19 @@ trait Analog {
   def totalSamples: Int
 }
 
+trait Platform {
+  def plates: IndexedSeq[ForcePlate]
+}
+
 trait ForcePlate {
-  def force: IndexedSeq[Vec3D]
+  def forceInFPCoords: IndexedSeq[Vec3D]
+  def momentInFPCoords: IndexedSeq[Vec3D]
 }
 
 trait C3D {
   def parameterSection: ParameterSection
   def analog: Analog
-  def forcePlates: IndexedSeq[ForcePlate]
+  def platform: Platform
 }
 
 object C3D {

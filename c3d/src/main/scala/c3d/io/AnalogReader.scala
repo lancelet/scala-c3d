@@ -3,7 +3,7 @@ package c3d.io
 import scala.collection.immutable._
 import c3d._
 
-private[io] case class AnalogReader(parameterSection: ParameterSection, dataSection: FormattedByteIndexedSeq)
+private[io] final case class AnalogReader(parameterSection: ParameterSection, dataSection: FormattedByteIndexedSeq)
   extends Analog {
   
   
