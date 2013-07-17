@@ -103,6 +103,7 @@ trait Platform {
 trait ForcePlate {
   def forceInFPCoords: IndexedSeq[Vec3D]
   def momentInFPCoords: IndexedSeq[Vec3D]
+  def origin: Vec3D
 }
 
 trait C3D {

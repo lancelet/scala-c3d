@@ -53,6 +53,16 @@ class PlatformReaderSpec extends FunSpec with C3DFileSource {
       assert(slice === fp2fz_samples_640_to_650)
     }
     
+    it("should have the correct force plate origin (Sample08.EB015PI)") {
+      val pr = platformReader(Sample08.EB015PI)
+      val p1: ForcePlate = pr.plates(0)
+      val p2: ForcePlate = pr.plates(1)
+      val expectedOrigin1 = DefaultVec3D(-4.4f, 1.9f, -21.6f)
+      val expectedOrigin2 = DefaultVec3D(-4.06f, 3.81f, -20.06f)
+      assert(p1.origin === expectedOrigin1)
+      assert(p2.origin === expectedOrigin2)
+    }
+    
   }
   
 }

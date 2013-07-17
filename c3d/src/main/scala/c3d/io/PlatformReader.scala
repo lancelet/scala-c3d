@@ -8,11 +8,26 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
   
   
   /**
+   * Base trait providing some common force-plate functionality.
+   */
+  trait FPBase {
+    
+    def plateIndex: Int
+    
+    val origin: Vec3D = {
+      val op: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "ORIGIN")
+      DefaultVec3D(op(0, plateIndex), op(1, plateIndex), op(2, plateIndex))
+    }
+    
+  }
+  
+  
+  /**
    * Type 2 force plate.
    * 
    * Type 2 force plates reference force and moment channels directly in the analog data.
    */
-  private final case class Type2(plateIndex: Int) extends ForcePlate {
+  private final case class Type2(plateIndex: Int) extends ForcePlate with FPBase {
 
     private val channels: Array[AnalogChannel] = {
       val channelNumbers: Parameter[Int] = getReqParameter[Int]("FORCE_PLATFORM", "CHANNEL")
@@ -25,11 +40,6 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
       assert((xc.length == yc.length) && (xc.length == zc.length), "all channels must be the same length")
       def length: Int = xc.length
       def apply(index: Int): Vec3D = DefaultVec3D(xc(index), yc(index), zc(index))
-    }
-    
-    private val origin: Vec3D = {
-      val op: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "ORIGIN")
-      DefaultVec3D(op(0, plateIndex), op(1, plateIndex), op(2, plateIndex))
     }
         
     def forceInFPCoords: IndexedSeq[Vec3D] = ChannelVec3DISeq(channels(0), channels(1), channels(2))
@@ -44,7 +54,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
    * Type 4 force plates are similar to Type 2, except that the output from a Type 2 plate then passes through a
    * calibration matrix.
    */
-  private final case class Type4(plateIndex: Int) extends ForcePlate {
+  private final case class Type4(plateIndex: Int) extends ForcePlate with FPBase {
     
     private val t2: Type2 = Type2(plateIndex)
 
