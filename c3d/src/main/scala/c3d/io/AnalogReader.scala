@@ -9,6 +9,7 @@ private[io] case class AnalogReader(parameterSection: ParameterSection, dataSect
   
   def channels: IndexedSeq[AnalogChannel] = ReadAnalogChannelIndexedSeq    
   def getChannelByName(name: String): Option[AnalogChannel] = channelMap.get(name.toUpperCase)
+  def samplingRate: Float = rp.analogRate
  
   
   private lazy val channelMap: Map[String, AnalogChannel] = channels.map(c => (c.name.toUpperCase, c)).toMap

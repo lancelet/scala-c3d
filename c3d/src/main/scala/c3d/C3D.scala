@@ -89,6 +89,7 @@ trait AnalogChannel extends IndexedSeq[Float] {
 trait Analog {
   def channels: IndexedSeq[AnalogChannel]
   def getChannelByName(name: String): Option[AnalogChannel]
+  def samplingRate: Float
 }
 
 trait ForcePlate {
