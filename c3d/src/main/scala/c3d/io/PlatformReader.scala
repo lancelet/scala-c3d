@@ -4,7 +4,7 @@ import scala.collection.immutable._
 import c3d._
 import scala.reflect.runtime.universe._
 
-private[io] final case class PlatformReader(parameterSection: ParameterSection, analog: Analog) extends Platform {  
+private[io] final case class PlatformReader(parameterSection: ParameterSection, analog: Analog) extends Platforms {  
   
   
   /**
@@ -13,6 +13,8 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
   trait FPBase {
     
     def plateIndex: Int
+    def forceInFPCoords: IndexedSeq[Vec3D]
+    def momentInFPCoords: IndexedSeq[Vec3D]
     
     val origin: Vec3D = {
       val op: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "ORIGIN")
@@ -23,6 +25,35 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
       val cp: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "CORNERS")
       for (i <- 0 until 4) yield DefaultVec3D(cp(0, i, plateIndex), cp(1, i, plateIndex), cp(2, i, plateIndex))
     }
+    
+    val center: Vec3D = (corners(0) + corners(1) + corners(2) + corners(3)) * 0.25f
+    
+    val rotWorldToPlate: RotMatrix = {
+      val xHat = ((corners(0) - corners(1)) + (corners(3) - corners(2))) * 0.5f
+      val yHat = ((corners(0) - corners(3)) + (corners(1) - corners(2))) * 0.5f
+      RotMatrix.fromBasisVectorsXY(xHat, yHat)
+    }
+    val rotPlateToWorld: RotMatrix = rotWorldToPlate.inv
+    
+    object ForceIndexedSeq extends IndexedSeq[Vec3D] {
+      def length: Int = forceInFPCoords.length
+      def apply(index: Int): Vec3D = rotPlateToWorld(forceInFPCoords(index))
+    }
+    
+    object MomentIndexedSeq extends IndexedSeq[Vec3D] {
+      def length: Int = momentInFPCoords.length
+      def apply(index: Int): Vec3D = {  // TODO: this does not match Mokka
+        val fp = forceInFPCoords(index)
+        val mp = momentInFPCoords(index)
+        val mgeo = mp - (origin cross fp)
+        val fpWorld = rotPlateToWorld(fp)
+        val mgeoWorld = rotPlateToWorld(mgeo)
+        mgeoWorld + (center cross fpWorld)
+      }
+    }
+    
+    def force: IndexedSeq[Vec3D] = ForceIndexedSeq
+    def moment: IndexedSeq[Vec3D] = MomentIndexedSeq
     
   }
   

@@ -80,7 +80,7 @@ object C3DReader {
     dataSection: FormattedByteIndexedSeq) extends C3D
   {
     val analog: Analog = AnalogReader(parameterSection, dataSection)
-    val platform: Platform = PlatformReader(parameterSection, analog)
+    val platforms: Platforms = PlatformReader(parameterSection, analog)
   }
 
   /** Reads a C3D file from a `File`.

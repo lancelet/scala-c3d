@@ -81,6 +81,26 @@ class PlatformReaderSpec extends FunSpec with C3DFileSource {
       assert(p2.corners === expectedCorners2)
     }
     
+    it("should contain correct world Mz components for force platform 2 (Sample08.EB015PI)") {
+      val pr = platformReader(Sample08.EB015PI)
+      val p2 = pr.plates(1)
+      val mzWorld: IndexedSeq[Float] = p2.moment.map(_.z)
+      val slice: IndexedSeq[Float] = mzWorld.slice(640, 651)
+      println("PlatformReaderSpec (TODO: does not match Mokka output):")
+      println("slice = " + slice)
+      // TODO: this does not match Mokka
+    }
+
+    it("should contain correct world Fz components for force platform 2 (Sample08.EB015PI)") {
+      val pr = platformReader(Sample08.EB015PI)
+      val p2 = pr.plates(1)
+      val fzWorld: IndexedSeq[Float] = p2.force.map(_.z)
+      val slice: IndexedSeq[Float] = fzWorld.slice(640, 651)
+      val expectedFzWorld: IndexedSeq[Float] = IndexedSeq(463.82132f, 466.87238f, 471.44937f, 476.7882f, 482.89157f,
+        482.89243f, 485.18396f, 490.52142f, 492.8132f, 495.10004f, 500.44354f)
+      assert(slice === expectedFzWorld)
+    }
+    
   }
   
 }
