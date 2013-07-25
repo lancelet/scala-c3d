@@ -3,17 +3,20 @@ package c3d.io
 import scala.collection.immutable._
 import c3d._
 
+/**
+ * TODO: Merge common elements from PointsReader and AnalogReader into a parent trait.
+ */
 private[io] final case class AnalogReader(parameterSection: ParameterSection, dataSection: FormattedByteIndexedSeq)
   extends Analog {
   
   
   def channels: IndexedSeq[AnalogChannel] = ReadAnalogChannelIndexedSeq    
-  def getChannelByName(name: String): Option[AnalogChannel] = channelMap.get(name.toUpperCase)
+  def getChannelByName(name: String): Option[AnalogChannel] = channelMap.get(name.trim.toUpperCase)
   def samplingRate: Float = rp.analogRate
   def totalSamples: Int = AnalogStats.totalAnalogSamples
  
   
-  private lazy val channelMap: Map[String, AnalogChannel] = channels.map(c => (c.name.toUpperCase, c)).toMap
+  private lazy val channelMap: Map[String, AnalogChannel] = channels.map(c => (c.name.trim.toUpperCase, c)).toMap
   
   
   private final val rp: RequiredParameters = parameterSection.requiredParameters  

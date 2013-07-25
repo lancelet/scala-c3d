@@ -46,6 +46,8 @@ trait RequiredParameters {
   def pointFrames: Int
   def pointUsed: Int
   def pointScale: Float
+  def pointLabels: Parameter[String]
+  def pointDescriptions: Parameter[String]
   def analogRate: Float
   def analogUsed: Int
   def analogGenScale: Float
@@ -112,10 +114,23 @@ trait ForcePlate {
   def corners: IndexedSeq[Vec3D]
 }
 
+trait Point extends IndexedSeq[Option[Vec3D]] {
+  def name: String
+  def description: String
+}
+
+trait Points {
+  def points: IndexedSeq[Point]
+  def getPointByName(name: String): Option[Point]
+  def samplingRate: Float
+  def totalSamples: Int
+}
+
 trait C3D {
   def parameterSection: ParameterSection
   def analog: Analog
   def platforms: Platforms
+  def points: Points
 }
 
 object C3D {

@@ -81,6 +81,7 @@ object C3DReader {
   {
     val analog: Analog = AnalogReader(parameterSection, dataSection)
     val platforms: Platforms = PlatformReader(parameterSection, analog)
+    val points: Points = PointsReader(parameterSection, dataSection)
   }
 
   /** Reads a C3D file from a `File`.
