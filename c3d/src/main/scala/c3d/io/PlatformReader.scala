@@ -16,6 +16,11 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     def forceInFPCoords: IndexedSeq[Vec3D]
     def momentInFPCoords: IndexedSeq[Vec3D]
     
+    /**
+     * Origin for Type 2 and Type 4 force platforms is a vector from the origin of the force platform coordinate
+     * system to the point at the geometric center of the force platform working surface, expressed in the force
+     * platform coordinate system.
+     */
     val origin: Vec3D = {
       val op: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "ORIGIN")
       DefaultVec3D(op(0, plateIndex), op(1, plateIndex), op(2, plateIndex))
@@ -34,26 +39,47 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
       RotMatrix.fromBasisVectorsXY(xHat, yHat)
     }
     val rotPlateToWorld: RotMatrix = rotWorldToPlate.inv
+   
+    object PwaIndexedSeq extends IndexedSeq[Vec3D] {
+      def length: Int = forceInFPCoords.length
+      def apply(i: Int): Vec3D = {
+        // find the component of the moment that is not parallel to the force
+        val f = force(i)
+        val fHat = f.asUnit
+        val mo = momentAtOrigin(i)
+        val mt = mo - (fHat * (mo dot fHat))
+        // find r
+        val rHat = (fHat cross mo).asUnit
+        val r = rHat * (mt.mag / f.mag)
+        // intersect with force plate plane (x-y plane, z=0)
+        val s = -r.z / fHat.z
+        val p = r + fHat * s
+        center + p
+      }
+    }    
     
     object ForceIndexedSeq extends IndexedSeq[Vec3D] {
       def length: Int = forceInFPCoords.length
-      def apply(index: Int): Vec3D = rotPlateToWorld(forceInFPCoords(index))
+      def apply(i: Int): Vec3D = rotPlateToWorld(forceInFPCoords(i))
+    }
+    
+    object MomentAtOriginIndexedSeq extends IndexedSeq[Vec3D] {
+      def length: Int = momentInFPCoords.length
+      def apply(i: Int): Vec3D = rotPlateToWorld(momentInFPCoords(i) - (origin cross forceInFPCoords(i)))
     }
     
     object MomentIndexedSeq extends IndexedSeq[Vec3D] {
       def length: Int = momentInFPCoords.length
-      def apply(index: Int): Vec3D = {  // TODO: this does not match Mokka
-        val fp = forceInFPCoords(index)
-        val mp = momentInFPCoords(index)
-        val mgeo = mp - (origin cross fp)
-        val fpWorld = rotPlateToWorld(fp)
-        val mgeoWorld = rotPlateToWorld(mgeo)
-        mgeoWorld + (center cross fpWorld)
+      def apply(i: Int): Vec3D = {
+        val r = pwa(i) - center
+        momentAtOrigin(i) - (r cross force(i))
       }
     }
-    
+       
+    def pwa: IndexedSeq[Vec3D] = PwaIndexedSeq
     def force: IndexedSeq[Vec3D] = ForceIndexedSeq
     def moment: IndexedSeq[Vec3D] = MomentIndexedSeq
+    def momentAtOrigin: IndexedSeq[Vec3D] = MomentAtOriginIndexedSeq
     
   }
   

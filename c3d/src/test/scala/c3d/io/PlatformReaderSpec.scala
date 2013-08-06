@@ -86,9 +86,9 @@ class PlatformReaderSpec extends FunSpec with C3DFileSource {
       val p2 = pr.plates(1)
       val mzWorld: IndexedSeq[Float] = p2.moment.map(_.z)
       val slice: IndexedSeq[Float] = mzWorld.slice(640, 651)
-      println("PlatformReaderSpec (TODO: does not match Mokka output):")
-      println("slice = " + slice)
-      // TODO: this does not match Mokka
+      val expectedMzWorld: IndexedSeq[Float] = IndexedSeq(3963.6323f, 4030.9893f, 3931.2227f, 3943.3105f, 3934.6538f, 
+        3973.2725f, 4056.248f, 4025.6084f, 4062.0537f, 3970.9888f, 4093.3125f)
+      assert(slice === expectedMzWorld)
     }
 
     it("should contain correct world Fz components for force platform 2 (Sample08.EB015PI)") {
@@ -99,6 +99,16 @@ class PlatformReaderSpec extends FunSpec with C3DFileSource {
       val expectedFzWorld: IndexedSeq[Float] = IndexedSeq(463.82132f, 466.87238f, 471.44937f, 476.7882f, 482.89157f,
         482.89243f, 485.18396f, 490.52142f, 492.8132f, 495.10004f, 500.44354f)
       assert(slice === expectedFzWorld)
+    }
+    
+    it("should contain correct world pwa components for force platform 2 (Sample08.EB015PI)") {
+      val pr = platformReader(Sample08.EB015PI)
+      val p2 = pr.plates(1)
+      val pwaY: IndexedSeq[Float] = p2.pwa.map(_.y)
+      val slice: IndexedSeq[Float] = pwaY.slice(640, 651)
+      val expectedPwaY: IndexedSeq[Float] = IndexedSeq(736.95294f, 736.5673f, 736.93054f, 737.75977f, 738.83716f, 
+        738.0668f, 737.2706f, 738.80206f, 738.51355f, 739.1481f, 740.2363f)
+      assert(slice === expectedPwaY)
     }
     
   }

@@ -82,6 +82,7 @@ trait Vec3D {
   def z: Float
   def mag: Float = math.sqrt(x*x + y*y + z*z).toFloat
   def cross(v: Vec3D): Vec3D = ???
+  def dot(v: Vec3D): Float = ???
   def +(v: Vec3D): Vec3D = ???
   def -(v: Vec3D): Vec3D = ???
   def /(s: Float): Vec3D = ???
@@ -106,11 +107,13 @@ trait Platforms {
 }
 
 trait ForcePlate {
-  def force: IndexedSeq[Vec3D]
-  def moment: IndexedSeq[Vec3D]
-  def forceInFPCoords: IndexedSeq[Vec3D]
-  def momentInFPCoords: IndexedSeq[Vec3D]
-  def origin: Vec3D
+  def pwa: IndexedSeq[Vec3D]      // point of wrench application, expressed in world coordinates
+  def force: IndexedSeq[Vec3D]    // force, expressed in world coordinates
+  def moment: IndexedSeq[Vec3D]   // moment, expressed in world coordinates, at the point of wrench application
+  def momentAtOrigin: IndexedSeq[Vec3D]    // moment, expressed in world coordinates, at geo centre of working surface
+  def forceInFPCoords: IndexedSeq[Vec3D]   // force, in fp coordinates
+  def momentInFPCoords: IndexedSeq[Vec3D]  // moment, at fp coordinates
+  def origin: Vec3D               // from fp coord origin to geometric centre of working surface (in fp coords)
   def corners: IndexedSeq[Vec3D]
 }
 
