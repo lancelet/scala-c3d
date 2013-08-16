@@ -15,6 +15,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     def plateIndex: Int
     def forceInFPCoords: IndexedSeq[Vec3D]
     def momentInFPCoords: IndexedSeq[Vec3D]
+    def rate: Float = getReqParameter[Float]("ANALOG", "RATE").apply(0)
     
     /**
      * Origin for Type 2 and Type 4 force platforms is a vector from the origin of the force platform coordinate
@@ -173,6 +174,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
   
   
   def plates: IndexedSeq[ForcePlate] = ForcePlateIndexedSeq
+  def rate: Float = getReqParameter[Float]("ANALOG", "RATE").apply(0)
 
   
   private def getReqParameter[T: TypeTag](groupName: String, paramName: String): Parameter[T] = {

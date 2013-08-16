@@ -53,8 +53,9 @@ class AnalogReaderSpec extends FunSpec with C3DFileSource {
     }
     
     it("should find the correct sampling rate (Sample08.EB015PI)") {
-      val samplingRate = analogReader(Sample08.EB015PI).samplingRate
+      val samplingRate = analogReader(Sample08.EB015PI).rate
       assert(samplingRate === 200.0f)
+      for (channel <- analogReader(Sample08.EB015PI).channels) assert(channel.rate === 200.0f)
     }
     
     it("should correctly find the length of each channel (Sample08.EB015PI)") {

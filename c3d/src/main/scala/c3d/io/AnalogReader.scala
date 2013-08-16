@@ -9,7 +9,7 @@ private[io] final case class AnalogReader(parameterSection: ParameterSection, da
   
   def channels: IndexedSeq[AnalogChannel] = ReadAnalogChannelIndexedSeq    
   def getChannelByName(name: String): Option[AnalogChannel] = channelMap.get(name.trim.toUpperCase)
-  def samplingRate: Float = rp.analogRate
+  def rate: Float = rp.analogRate
   def totalSamples: Int = DataStats.totalAnalogSamples
  
   
@@ -25,6 +25,7 @@ private[io] final case class AnalogReader(parameterSection: ParameterSection, da
     def description: String = rp.analogDescriptions(channelIndex)
     def length: Int = DataStats.totalAnalogSamples
     def apply(index: Int): Float = scale * (ItemReader.dataReader(getDataByteIndex(index)) - offset)
+    def rate: Float = rp.analogRate
 
     private def getDataByteIndex(sampleIndex: Int): Int = {
       assert((sampleIndex >= 0) && (sampleIndex < length), s"sampleIndex must satisfy: 0 <= sampleIndex < $length")

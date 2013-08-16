@@ -73,8 +73,9 @@ class PointsReaderSpec extends FunSpec with C3DFileSource {
     }
     
     it("should find the correct sampling rate (Sample08.EB015PI)") {
-      val samplingRate = pointsReader(Sample08.EB015PI).samplingRate
-      assert(samplingRate === 50.0f)
+      val pr = pointsReader(Sample08.EB015PI)
+      assert(pr.rate === 50.0f)
+      for (point <- pr.points) assert(point.rate == 50.0f)
     }
     
     it("should correctly find the length of each point (Sample08.EB015PI)") {

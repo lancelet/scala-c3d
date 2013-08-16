@@ -40,6 +40,10 @@ trait Group {
     signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
 }
 
+trait Sampled {
+  def rate: Float
+}
+
 trait RequiredParameters {
   def pointDataStart: Int
   def pointRate: Float
@@ -90,23 +94,23 @@ trait Vec3D {
   def asUnit: Vec3D = ???
 }
 
-trait AnalogChannel extends IndexedSeq[Float] {
+trait AnalogChannel extends IndexedSeq[Float] with Sampled {
   def name: String
   def description: String
 }
 
-trait Analog {
+trait Analog extends Sampled {
   def channels: IndexedSeq[AnalogChannel]
   def getChannelByName(name: String): Option[AnalogChannel]
-  def samplingRate: Float
+  //def samplingRate: Float // TODO: REMOVE
   def totalSamples: Int
 }
 
-trait Platforms {
+trait Platforms extends Sampled {
   def plates: IndexedSeq[ForcePlate]
 }
 
-trait ForcePlate {
+trait ForcePlate extends Sampled {
   def pwa: IndexedSeq[Vec3D]      // point of wrench application, expressed in world coordinates
   def force: IndexedSeq[Vec3D]    // force, expressed in world coordinates
   def moment: IndexedSeq[Vec3D]   // moment, expressed in world coordinates, at the point of wrench application
@@ -117,15 +121,15 @@ trait ForcePlate {
   def corners: IndexedSeq[Vec3D]
 }
 
-trait Point extends IndexedSeq[Option[Vec3D]] {
+trait Point extends IndexedSeq[Option[Vec3D]] with Sampled {
   def name: String
   def description: String
 }
 
-trait Points {
+trait Points extends Sampled {
   def points: IndexedSeq[Point]
   def getPointByName(name: String): Option[Point]
-  def samplingRate: Float
+  //def samplingRate: Float // TODO: REMOVE
   def totalSamples: Int
 }
 

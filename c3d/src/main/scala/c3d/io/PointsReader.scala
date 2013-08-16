@@ -8,7 +8,7 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
 
   def points: IndexedSeq[Point] = ReadPointsIndexedSeq
   def getPointByName(name: String): Option[Point] = pointMap.get(name.trim.toUpperCase)
-  def samplingRate: Float = rp.pointRate
+  def rate: Float = rp.pointRate
   def totalSamples: Int = rp.pointFrames  
   
   private lazy val pointMap: Map[String, Point] = points.map(c => (c.name.trim.toUpperCase, c)).toMap
@@ -37,6 +37,7 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
         Some(DefaultVec3D(x, y, z))
       }
     }
+    def rate: Float = rp.pointRate
    
     private def getDataByteIndex(sampleIndex: Int): Int = {
       assert((sampleIndex >= 0) && (sampleIndex < length), s"sampleIndex must satisfy: 0 <= sampleIndex < $length")

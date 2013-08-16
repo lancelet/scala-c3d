@@ -64,7 +64,7 @@ object Dependencies {
   val scalalang    = "org.scala-lang" %  "scala-library" % "2.10.2"  // why is this required?
   val scalareflect = "org.scala-lang" %  "scala-reflect" % "2.10.2"
   val scalaz       = "org.scalaz"     %% "scalaz-core"   % "7.0.0"
-  val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.M6-SNAP16" % "test"
+  val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.RC1-SNAP4" % "test"
   val scallop      = "org.rogach"     %% "scallop"       % "0.9.1"
   val xmlunit      = "xmlunit"        %  "xmlunit"       % "1.4"
 }

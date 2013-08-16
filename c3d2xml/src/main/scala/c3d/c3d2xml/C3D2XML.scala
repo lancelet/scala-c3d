@@ -88,7 +88,7 @@ object C3D2XML {
   /** Generate XML analog data. */
   private def generateAnalog(c3d: C3D): Elem = {
     <analog
-      samplingRate={c3d.analog.samplingRate.toString}
+      samplingRate={c3d.analog.rate.toString}
       totalSamples={c3d.analog.totalSamples.toString}
     >{
       for (channel <- c3d.analog.channels) yield {
