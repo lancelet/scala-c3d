@@ -46,6 +46,14 @@ object XMLTestSuiteSettings {
   )
 }
 
+object FXViewBuildSettings {
+  import CommonBuildSettings._
+  val buildName = "fx-view"
+  val buildSettings = commonBuildSettings ++ Seq(
+    name := buildName
+  )
+}
+
 object Resolvers {
   val scalaToolsSnapshots = "Scala Tools Snapshots" at
     "http://scala-tools.org/repo-snapshots/"
@@ -74,6 +82,11 @@ object C3D2XMLDependencies {
 object XMLTestSuiteDependencies {
   import Dependencies._
   val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest, scallop, xmlunit)
+}
+
+object FXViewDependencies {
+  import Dependencies._
+  val projectDependencies = Seq(scalalang)
 }
 
 object Tasks {
@@ -126,15 +139,6 @@ object C3DScalaBuild extends Build {
     ) dependsOn (c3d)
   }
 
-  lazy val c3dscala = {
-    import C3DScalaBuildSettings._
-    Project(
-      id = "c3d-scala",
-      base = file("."),
-      settings = buildSettings ++ projectTasks
-    ) aggregate(c3d, c3d2xml)
-  }
-
   lazy val xmlTestSuite = {
     import XMLTestSuiteSettings._
     import XMLTestSuiteDependencies._
@@ -146,6 +150,29 @@ object C3DScalaBuild extends Build {
         libraryDependencies ++= projectDependencies
       )
     ) dependsOn (c3d, c3d2xml)
+  }
+
+  lazy val fxView = {
+    import FXViewBuildSettings._
+    import FXViewDependencies._
+    Project (
+      id = "fx-view",
+      base = file("fx-view"),
+      settings = buildSettings ++ Seq(
+        resolvers           := projectResolvers,
+        libraryDependencies ++= projectDependencies,
+        fork in run         := true
+      )
+    ) dependsOn (c3d)
+  }
+
+  lazy val c3dscala = {
+    import C3DScalaBuildSettings._
+    Project(
+      id = "c3d-scala",
+      base = file("."),
+      settings = buildSettings ++ projectTasks
+    ) aggregate(c3d, c3d2xml, xmlTestSuite, fxView)
   }
 
 }
