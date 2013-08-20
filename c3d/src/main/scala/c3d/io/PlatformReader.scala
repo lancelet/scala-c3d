@@ -13,8 +13,8 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
   trait FPBase {
     
     def plateIndex: Int
-    def forceInFPCoords: IndexedSeq[Vec3D]
-    def momentInFPCoords: IndexedSeq[Vec3D]
+    def forceInFPCoords: SIndexedSeq[Vec3D]
+    def momentInFPCoords: SIndexedSeq[Vec3D]
     def rate: Float = getReqParameter[Float]("ANALOG", "RATE").apply(0)
     
     /**
@@ -41,7 +41,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     }
     val rotPlateToWorld: RotMatrix = rotWorldToPlate.inv
    
-    object PwaIndexedSeq extends IndexedSeq[Vec3D] {
+    object PwaIndexedSeq extends SIndexedSeq[Vec3D] {
       def length: Int = forceInFPCoords.length
       def apply(i: Int): Vec3D = {
         // find the component of the moment that is not parallel to the force
@@ -57,30 +57,34 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
         val p = r + fHat * s
         center + p
       }
+      def rate: Float = PlatformReader.this.rate
     }    
     
-    object ForceIndexedSeq extends IndexedSeq[Vec3D] {
+    object ForceIndexedSeq extends SIndexedSeq[Vec3D] {
       def length: Int = forceInFPCoords.length
       def apply(i: Int): Vec3D = rotPlateToWorld(forceInFPCoords(i))
+      def rate: Float = PlatformReader.this.rate
     }
     
-    object MomentAtOriginIndexedSeq extends IndexedSeq[Vec3D] {
+    object MomentAtOriginIndexedSeq extends SIndexedSeq[Vec3D] {
       def length: Int = momentInFPCoords.length
       def apply(i: Int): Vec3D = rotPlateToWorld(momentInFPCoords(i) - (origin cross forceInFPCoords(i)))
+      def rate: Float = PlatformReader.this.rate
     }
     
-    object MomentIndexedSeq extends IndexedSeq[Vec3D] {
+    object MomentIndexedSeq extends SIndexedSeq[Vec3D] {
       def length: Int = momentInFPCoords.length
       def apply(i: Int): Vec3D = {
         val r = pwa(i) - center
         momentAtOrigin(i) - (r cross force(i))
       }
+      def rate: Float = PlatformReader.this.rate
     }
        
-    def pwa: IndexedSeq[Vec3D] = PwaIndexedSeq
-    def force: IndexedSeq[Vec3D] = ForceIndexedSeq
-    def moment: IndexedSeq[Vec3D] = MomentIndexedSeq
-    def momentAtOrigin: IndexedSeq[Vec3D] = MomentAtOriginIndexedSeq
+    def pwa: SIndexedSeq[Vec3D] = PwaIndexedSeq
+    def force: SIndexedSeq[Vec3D] = ForceIndexedSeq
+    def moment: SIndexedSeq[Vec3D] = MomentIndexedSeq
+    def momentAtOrigin: SIndexedSeq[Vec3D] = MomentAtOriginIndexedSeq
     
   }
   
@@ -99,14 +103,15 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     }
     
     private final case class ChannelVec3DISeq(xc: AnalogChannel, yc: AnalogChannel, zc: AnalogChannel)
-    extends IndexedSeq[Vec3D] {
+    extends SIndexedSeq[Vec3D] {
       assert((xc.length == yc.length) && (xc.length == zc.length), "all channels must be the same length")
       def length: Int = xc.length
       def apply(index: Int): Vec3D = DefaultVec3D(xc(index), yc(index), zc(index))
+      def rate: Float = PlatformReader.this.rate
     }
         
-    def forceInFPCoords: IndexedSeq[Vec3D] = ChannelVec3DISeq(channels(0), channels(1), channels(2))
-    def momentInFPCoords: IndexedSeq[Vec3D] = ChannelVec3DISeq(channels(3), channels(4), channels(5))
+    def forceInFPCoords: SIndexedSeq[Vec3D] = ChannelVec3DISeq(channels(0), channels(1), channels(2))
+    def momentInFPCoords: SIndexedSeq[Vec3D] = ChannelVec3DISeq(channels(3), channels(4), channels(5))
     
   }
   
@@ -132,7 +137,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     }
     def m(r: Int, c: Int): Float = calibrationMatrix(c + r*6)
 
-    private final case class CalMatrixISeq(startMatrixRow: Int) extends IndexedSeq[Vec3D] {
+    private final case class CalMatrixISeq(startMatrixRow: Int) extends SIndexedSeq[Vec3D] {
       private val r = startMatrixRow
       private val s = startMatrixRow + 1
       private val t = startMatrixRow + 2
@@ -149,10 +154,11 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
         val z = m(t, 0) * fx + m(t, 1) * fy + m(t, 2) * fz + m(t, 3) * mx + m(t, 4) * my + m(t, 5) * mz
         DefaultVec3D(x, y, z)
       }
+      def rate: Float = PlatformReader.this.rate
     }
     
-    def forceInFPCoords: IndexedSeq[Vec3D] = CalMatrixISeq(0)
-    def momentInFPCoords: IndexedSeq[Vec3D] = CalMatrixISeq(3)
+    def forceInFPCoords: SIndexedSeq[Vec3D] = CalMatrixISeq(0)
+    def momentInFPCoords: SIndexedSeq[Vec3D] = CalMatrixISeq(3)
     
   }
   

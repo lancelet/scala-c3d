@@ -40,10 +40,6 @@ trait Group {
     signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]]
 }
 
-trait Sampled {
-  def rate: Float
-}
-
 trait RequiredParameters {
   def pointDataStart: Int
   def pointRate: Float
@@ -94,42 +90,45 @@ trait Vec3D {
   def asUnit: Vec3D = ???
 }
 
-trait AnalogChannel extends IndexedSeq[Float] with Sampled {
+trait AnalogChannel extends SIndexedSeq[Float] {
   def name: String
   def description: String
 }
 
-trait Analog extends Sampled {
+trait Analog {
   def channels: IndexedSeq[AnalogChannel]
   def getChannelByName(name: String): Option[AnalogChannel]
-  //def samplingRate: Float // TODO: REMOVE
+  def rate: Float
   def totalSamples: Int
 }
 
-trait Platforms extends Sampled {
+trait Platforms {
   def plates: IndexedSeq[ForcePlate]
+  def rate: Float
 }
 
-trait ForcePlate extends Sampled {
-  def pwa: IndexedSeq[Vec3D]      // point of wrench application, expressed in world coordinates
-  def force: IndexedSeq[Vec3D]    // force, expressed in world coordinates
-  def moment: IndexedSeq[Vec3D]   // moment, expressed in world coordinates, at the point of wrench application
-  def momentAtOrigin: IndexedSeq[Vec3D]    // moment, expressed in world coordinates, at geo centre of working surface
-  def forceInFPCoords: IndexedSeq[Vec3D]   // force, in fp coordinates
-  def momentInFPCoords: IndexedSeq[Vec3D]  // moment, at fp coordinates
+trait ForcePlate {
+  def pwa: SIndexedSeq[Vec3D]      // point of wrench application, expressed in world coordinates
+  def force: SIndexedSeq[Vec3D]    // force, expressed in world coordinates
+  def moment: SIndexedSeq[Vec3D]   // moment, expressed in world coordinates, at the pwa
+  def momentAtOrigin: SIndexedSeq[Vec3D]   // moment, expressed in world coordinates, at geo centre
+  def forceInFPCoords: SIndexedSeq[Vec3D]  // force, in fp coordinates
+  def momentInFPCoords: SIndexedSeq[Vec3D] // moment, at fp coordinates
   def origin: Vec3D               // from fp coord origin to geometric centre of working surface (in fp coords)
   def corners: IndexedSeq[Vec3D]
+  def rate: Float
 }
 
-trait Point extends IndexedSeq[Option[Vec3D]] with Sampled {
+trait Point extends IndexedSeq[Option[Vec3D]] {
   def name: String
   def description: String
+  def rate: Float
 }
 
-trait Points extends Sampled {
+trait Points {
   def points: IndexedSeq[Point]
   def getPointByName(name: String): Option[Point]
-  //def samplingRate: Float // TODO: REMOVE
+  def rate: Float
   def totalSamples: Int
 }
 
