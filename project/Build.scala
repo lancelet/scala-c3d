@@ -67,11 +67,12 @@ object Dependencies {
   val scalatest    = "org.scalatest"  %% "scalatest"     % "2.0.RC1-SNAP4" % "test"
   val scallop      = "org.rogach"     %% "scallop"       % "0.9.1"
   val xmlunit      = "xmlunit"        %  "xmlunit"       % "1.4"
+  val ejml         = "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.23"
 }
 
 object C3DDependencies {
   import Dependencies._
-  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest)
+  val projectDependencies = Seq(scalalang, scalareflect, scalaz, scalatest, ejml)
 }
 
 object C3D2XMLDependencies {
