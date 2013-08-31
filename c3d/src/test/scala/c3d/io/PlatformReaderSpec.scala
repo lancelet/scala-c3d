@@ -57,8 +57,8 @@ class PlatformReaderSpec extends FunSpec with C3DFileSource {
       val pr = platformReader(Sample08.EB015PI)
       val p1: ForcePlate = pr.plates(0)
       val p2: ForcePlate = pr.plates(1)
-      val expectedOrigin1 = DefaultVec3D(-4.4f, 1.9f, -21.6f)
-      val expectedOrigin2 = DefaultVec3D(-4.06f, 3.81f, -20.06f)
+      val expectedOrigin1 = Vec3D(-4.4f, 1.9f, -21.6f)
+      val expectedOrigin2 = Vec3D(-4.06f, 3.81f, -20.06f)
       assert(p1.origin === expectedOrigin1)
       assert(p2.origin === expectedOrigin2)
     }
@@ -68,15 +68,15 @@ class PlatformReaderSpec extends FunSpec with C3DFileSource {
       val p1: ForcePlate = pr.plates(0)
       val p2: ForcePlate = pr.plates(1)
       val expectedCorners1 = IndexedSeq(
-        DefaultVec3D(520.0451f, 1242.1694f, 0.62186754f),
-        DefaultVec3D(57.04628f, 1243.1996f, 0.6211077f),
-        DefaultVec3D(58.1765f, 1751.1963f, 2.081213f),
-        DefaultVec3D(521.17535f, 1750.1661f, 2.0819728f))
+        Vec3D(520.0451f, 1242.1694f, 0.62186754f),
+        Vec3D(57.04628f, 1243.1996f, 0.6211077f),
+        Vec3D(58.1765f, 1751.1963f, 2.081213f),
+        Vec3D(521.17535f, 1750.1661f, 2.0819728f))
       val expectedCorners2 = IndexedSeq(
-        DefaultVec3D(53.655487f, 1139.9977f, 1.9204264f),
-        DefaultVec3D(516.6432f, 1143.3159f, 1.2880275f),
-        DefaultVec3D(520.2825f, 635.33014f, 0.18136889f),
-        DefaultVec3D(57.29477f, 632.01184f, 0.81376773f))
+        Vec3D(53.655487f, 1139.9977f, 1.9204264f),
+        Vec3D(516.6432f, 1143.3159f, 1.2880275f),
+        Vec3D(520.2825f, 635.33014f, 0.18136889f),
+        Vec3D(57.29477f, 632.01184f, 0.81376773f))
       assert(p1.corners === expectedCorners1)
       assert(p2.corners === expectedCorners2)
     }

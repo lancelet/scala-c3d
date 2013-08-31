@@ -16,14 +16,14 @@ class PointsReaderSpec extends FunSpec with C3DFileSource {
   private val lth1_samples_39_to_48: IndexedSeq[Option[Vec3D]] = IndexedSeq(
     None,
     None,
-    Some(DefaultVec3D(-85.583336f, 72.333336f, 675.0834f)),
-    Some(DefaultVec3D(-84.083336f, 75.250000f, 676.5834f)),
-    Some(DefaultVec3D(-83.166670f, 79.250000f, 678.3334f)),
-    Some(DefaultVec3D(-82.416670f, 82.416670f, 680.0000f)),
-    Some(DefaultVec3D(-81.833336f, 85.583336f, 682.5834f)),
-    Some(DefaultVec3D(-81.916670f, 89.083336f, 684.9167f)),
-    Some(DefaultVec3D(-82.000000f, 92.583336f, 687.0000f)),
-    Some(DefaultVec3D(-81.833336f, 95.166670f, 690.0000f)))
+    Some(Vec3D(-85.583336f, 72.333336f, 675.0834f)),
+    Some(Vec3D(-84.083336f, 75.250000f, 676.5834f)),
+    Some(Vec3D(-83.166670f, 79.250000f, 678.3334f)),
+    Some(Vec3D(-82.416670f, 82.416670f, 680.0000f)),
+    Some(Vec3D(-81.833336f, 85.583336f, 682.5834f)),
+    Some(Vec3D(-81.916670f, 89.083336f, 684.9167f)),
+    Some(Vec3D(-82.000000f, 92.583336f, 687.0000f)),
+    Some(Vec3D(-81.833336f, 95.166670f, 690.0000f)))
   
   describe("PointsReader") {
     
@@ -94,12 +94,12 @@ class PointsReaderSpec extends FunSpec with C3DFileSource {
       assert(pv3.offset === 47)
       assert(pv3.length === 403)
       val expectedSlice = IndexedSeq(
-        DefaultVec3D( 7.750000f, 3.2500000f, 936.5000f),
-        DefaultVec3D( 9.416667f, 3.5833335f, 939.9167f),
-        DefaultVec3D(12.333334f, 4.2500000f, 942.5834f),
-        DefaultVec3D(12.583334f, 4.5833335f, 946.5000f))
+        Vec3D( 7.750000f, 3.2500000f, 936.5000f),
+        Vec3D( 9.416667f, 3.5833335f, 939.9167f),
+        Vec3D(12.333334f, 4.2500000f, 942.5834f),
+        Vec3D(12.583334f, 4.5833335f, 946.5000f))
       assert(pv3.slice(0, 4) === expectedSlice)
-      assert(pv3(pv3.length - 1) === DefaultVec3D(106.333336f, 2125.8335f, 936.5834f))
+      assert(pv3(pv3.length - 1) === Vec3D(106.333336f, 2125.8335f, 936.5834f))
     }
     
     it("should contain correct point data (Sample08.EB015PI)") {

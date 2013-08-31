@@ -24,12 +24,12 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
      */
     val origin: Vec3D = {
       val op: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "ORIGIN")
-      DefaultVec3D(op(0, plateIndex), op(1, plateIndex), op(2, plateIndex))
+      Vec3D(op(0, plateIndex), op(1, plateIndex), op(2, plateIndex))
     }
     
     val corners: IndexedSeq[Vec3D] = {
       val cp: Parameter[Float] = getReqParameter[Float]("FORCE_PLATFORM", "CORNERS")
-      for (i <- 0 until 4) yield DefaultVec3D(cp(0, i, plateIndex), cp(1, i, plateIndex), cp(2, i, plateIndex))
+      for (i <- 0 until 4) yield Vec3D(cp(0, i, plateIndex), cp(1, i, plateIndex), cp(2, i, plateIndex))
     }
     
     val center: Vec3D = (corners(0) + corners(1) + corners(2) + corners(3)) * 0.25f
@@ -106,7 +106,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     extends SIndexedSeq[Vec3D] {
       assert((xc.length == yc.length) && (xc.length == zc.length), "all channels must be the same length")
       def length: Int = xc.length
-      def apply(index: Int): Vec3D = DefaultVec3D(xc(index), yc(index), zc(index))
+      def apply(index: Int): Vec3D = Vec3D(xc(index), yc(index), zc(index))
       def rate: Float = PlatformReader.this.rate
     }
         
@@ -152,7 +152,7 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
         val x = m(r, 0) * fx + m(r, 1) * fy + m(r, 2) * fz + m(r, 3) * mx + m(r, 4) * my + m(r, 5) * mz
         val y = m(s, 0) * fx + m(s, 1) * fy + m(s, 2) * fz + m(s, 3) * mx + m(s, 4) * my + m(s, 5) * mz
         val z = m(t, 0) * fx + m(t, 1) * fy + m(t, 2) * fz + m(t, 3) * mx + m(t, 4) * my + m(t, 5) * mz
-        DefaultVec3D(x, y, z)
+        Vec3D(x, y, z)
       }
       def rate: Float = PlatformReader.this.rate
     }

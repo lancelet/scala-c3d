@@ -76,20 +76,6 @@ object ProcessorType {
   object SGIMIPS extends ProcessorType
 }
 
-trait Vec3D {
-  def x: Float
-  def y: Float
-  def z: Float
-  def mag: Float = math.sqrt(x*x + y*y + z*z).toFloat
-  def cross(v: Vec3D): Vec3D = ???
-  def dot(v: Vec3D): Float = ???
-  def +(v: Vec3D): Vec3D = ???
-  def -(v: Vec3D): Vec3D = ???
-  def /(s: Float): Vec3D = ???
-  def *(s: Float): Vec3D = ???
-  def asUnit: Vec3D = ???
-}
-
 trait AnalogChannel extends SIndexedSeq[Float] {
   def name: String
   def description: String

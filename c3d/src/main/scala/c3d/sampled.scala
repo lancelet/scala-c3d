@@ -1,6 +1,5 @@
 package c3d
 
-import c3d.io.DefaultVec3D
 import scala.collection.immutable._
 import scala.annotation.tailrec
 import scala.math.Numeric
@@ -24,7 +23,7 @@ trait Vec3DCanAverage extends CanAverage[Vec3D] {
   def average(it: Iterator[Vec3D]): Vec3D = {
     @tailrec def avgAccum(x: Float, y: Float, z: Float, n: Int, it: Iterator[Vec3D]): Vec3D = {
       if (!it.hasNext) {
-        if (n == 0) DefaultVec3D(0,0,0) else DefaultVec3D(x / n, y / n, z / n)
+        if (n == 0) Vec3D(0,0,0) else Vec3D(x / n, y / n, z / n)
       } else {
         val v = it.next
         avgAccum(x + v.x, y + v.y, z + v.z, n + 1, it)

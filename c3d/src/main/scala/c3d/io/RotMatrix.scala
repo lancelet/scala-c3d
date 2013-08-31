@@ -8,7 +8,7 @@ private[io] final case class RotMatrix(
   m31: Float, m32: Float, m33: Float) {
 
   def apply(v: Vec3D): Vec3D = {
-    DefaultVec3D(
+    Vec3D(
       m11 * v.x + m12 * v.y + m13 * v.z,
       m21 * v.x + m22 * v.y + m23 * v.z,
       m31 * v.x + m32 * v.y + m33 * v.z)

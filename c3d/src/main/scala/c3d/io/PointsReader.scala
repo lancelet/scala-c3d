@@ -34,7 +34,7 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
         val x: Float = scale * r(dbi)
         val y: Float = scale * r(dbi + DataStats.dataItemSize)
         val z: Float = scale * r(dbi + (2 * DataStats.dataItemSize))
-        Some(DefaultVec3D(x, y, z))
+        Some(Vec3D(x, y, z))
       }
     }
     def rate: Float = rp.pointRate

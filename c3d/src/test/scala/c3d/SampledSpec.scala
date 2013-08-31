@@ -2,7 +2,7 @@ package c3d
 
 import scala.collection.immutable._
 import org.scalatest.FunSpec
-import c3d.io.{DefaultVec3D => V}
+import c3d.{Vec3D => V}
 
 class SampledSpec extends FunSpec {
   
