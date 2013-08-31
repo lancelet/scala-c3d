@@ -3,6 +3,7 @@ package c3d.io
 import scala.collection.immutable._
 import c3d._
 import scala.reflect.runtime.universe._
+import c3d.util.transform.RotationMatrix
 
 private[io] final case class PlatformReader(parameterSection: ParameterSection, analog: Analog) extends Platforms {  
   
@@ -34,12 +35,12 @@ private[io] final case class PlatformReader(parameterSection: ParameterSection, 
     
     val center: Vec3D = (corners(0) + corners(1) + corners(2) + corners(3)) * 0.25f
     
-    val rotWorldToPlate: RotMatrix = {
+    val rotWorldToPlate: RotationMatrix = {
       val xHat = ((corners(0) - corners(1)) + (corners(3) - corners(2))) * 0.5f
       val yHat = ((corners(0) - corners(3)) + (corners(1) - corners(2))) * 0.5f
-      RotMatrix.fromBasisVectorsXY(xHat, yHat)
+      RotationMatrix.fromBasisVectorsXY(xHat, yHat)
     }
-    val rotPlateToWorld: RotMatrix = rotWorldToPlate.inv
+    val rotPlateToWorld: RotationMatrix = rotWorldToPlate.inv
    
     object PwaIndexedSeq extends SIndexedSeq[Vec3D] {
       def length: Int = forceInFPCoords.length
