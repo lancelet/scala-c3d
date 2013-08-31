@@ -123,6 +123,7 @@ trait Point extends IndexedSeq[Option[Vec3D]] {
   def name: String
   def description: String
   def rate: Float
+  def asMarker: Marker  // TODO: Add point gap filler
 }
 
 trait Points {
@@ -130,6 +131,13 @@ trait Points {
   def getPointByName(name: String): Option[Point]
   def rate: Float
   def totalSamples: Int
+}
+
+trait Marker extends SIndexedSeq[Vec3D] {
+  def name: String
+  def description: String
+  def rate: Float
+  def offset: Int
 }
 
 trait C3D {

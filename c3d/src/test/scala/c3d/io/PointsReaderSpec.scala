@@ -85,6 +85,23 @@ class PointsReaderSpec extends FunSpec with C3DFileSource {
       assert(pr.totalSamples === pointSamples)
     }
     
+    it("should correctly convert a Point to a Marker (Sample08.EB015PI)") {
+      val pr = pointsReader(Sample08.EB015PI)
+      val pv3: Marker = pr.getPointByName("PV3").getOrElse(fail()).asMarker
+      assert(pv3.name.trim === "PV3")
+      assert(pv3.description.trim === "")
+      assert(pv3.rate === 50.0f)
+      assert(pv3.offset === 47)
+      assert(pv3.length === 403)
+      val expectedSlice = IndexedSeq(
+        DefaultVec3D( 7.750000f, 3.2500000f, 936.5000f),
+        DefaultVec3D( 9.416667f, 3.5833335f, 939.9167f),
+        DefaultVec3D(12.333334f, 4.2500000f, 942.5834f),
+        DefaultVec3D(12.583334f, 4.5833335f, 946.5000f))
+      assert(pv3.slice(0, 4) === expectedSlice)
+      assert(pv3(pv3.length - 1) === DefaultVec3D(106.333336f, 2125.8335f, 936.5834f))
+    }
+    
     it("should contain correct point data (Sample08.EB015PI)") {
       val fileSamples = pointsReader(Sample08.EB015PI).getPointByName("LTH1").getOrElse(fail()).slice(39, 49)
       assert(fileSamples === lth1_samples_39_to_48)

@@ -38,7 +38,15 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
       }
     }
     def rate: Float = rp.pointRate
-   
+    def asMarker: Marker = new Marker { // TODO: include marker gap filler
+      def name: String = ReadPoint.this.name
+      def description: String = ReadPoint.this.description
+      def rate: Float = ReadPoint.this.rate
+      val offset: Int = ReadPoint.this.indexWhere(_.isDefined)
+      def length: Int = ReadPoint.this.lastIndexWhere(_.isDefined) - offset + 1
+      def apply(index: Int): Vec3D = ReadPoint.this.apply(index + offset).get  // TODO: requires gap filling
+    }
+    
     private def getDataByteIndex(sampleIndex: Int): Int = {
       assert((sampleIndex >= 0) && (sampleIndex < length), s"sampleIndex must satisfy: 0 <= sampleIndex < $length")
       (sampleIndex * DataStats.dataStride) + (pointIndex * 4 * DataStats.dataItemSize)
