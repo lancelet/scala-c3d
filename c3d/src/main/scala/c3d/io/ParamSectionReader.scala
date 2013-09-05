@@ -137,7 +137,7 @@ private [io] object ParamSectionReader {
     */
   private [io] final class UntypedParameter(val block: FormattedByteIndexedSeq) {
     private def nName: Int = abs(block(0))                                    // # of characters in name
-    private def nDesc: Int = block(6 + nName + nDims + data.length) & 0xFFFF  // # of characters in description
+    private def nDesc: Int = block(6 + nName + nDims + data.length) & 0xFF    // # of characters in description
     private def descOfs: Int = 7 + nName + nDims + data.length                // offset to the start of the description
     private def nElem: Int = abs(byteLengthPerElement)                        // # of bytes in an element of the data
     private def nDims: Int = block(5 + nName)                                 // number of dimensions
@@ -150,7 +150,7 @@ private [io] object ParamSectionReader {
       } else { // handle a normal array (can still be a "scalar", or a multi-dimensional array)
         new IndexedSeq[Int] {
           def length: Int = nDims
-          def apply(idx: Int): Int = block(6 + nName + idx) & 0xFFFF
+          def apply(idx: Int): Int = block(6 + nName + idx) & 0xFF
         }
       }
     }
