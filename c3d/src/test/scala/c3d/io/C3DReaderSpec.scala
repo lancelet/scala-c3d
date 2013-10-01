@@ -29,7 +29,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
 
     it("should correctly read C3D file groups and parameters") {
       // successful reading
-      val c3d: C3D = C3DReader.read(Sample08.EB015PI)
+      val c3d: C3D = C3DReader.read("(test source)", Sample08.EB015PI)
 
       // check group and parameter names
       val groupNames = Seq("POINT", "ANALOG", "FORCE_PLATFORM", "FPLOC", "SUBJECT")
@@ -50,7 +50,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should allow typed access to groups and parameters via getParameter") {
-      val c3d = C3DReader.read(Sample08.EB015PI)
+      val c3d = C3DReader.read("(test source)", Sample08.EB015PI)
       // should fail to get a parameter of the wrong type
       assert(c3d.parameterSection.getParameter[Int]("Point", "x_screen").isEmpty, "should not find X_SCREEN as an Int")
       // should succeed if the parameter is the correct type
@@ -67,7 +67,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should index multi-dimensional parameters correctly") {
-      val c3d = C3DReader.read(Sample08.EB015PI)
+      val c3d = C3DReader.read("(test source)", Sample08.EB015PI)
       val pl: Parameter[Char] = c3d.parameterSection.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
       // check for an error if the sequence is the wrong size
       intercept[IllegalArgumentException] { pl(IndexedSeq(0, 0, 0)) }
@@ -83,7 +83,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should index multi-dimensional params through utility apply() methods") {
-      val c3d: C3D = C3DReader.read(Sample08.EB015PI)
+      val c3d: C3D = C3DReader.read("(test source)", Sample08.EB015PI)
       val pl: Parameter[Char] = c3d.parameterSection.getParameter[Char]("POINT", "LABELS").getOrElse(fail())
       // check for an error if indices are wrong
       intercept[IndexOutOfBoundsException] { pl(4, 0) }
@@ -101,7 +101,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should read string parameters") {
-      val c3d: C3D = C3DReader.read(Sample08.EB015PI)
+      val c3d: C3D = C3DReader.read("(test source)", Sample08.EB015PI)
       // should fail on non-String parameters
       assert(c3d.parameterSection.getParameter[String]("POINT", "DATA_START").isEmpty)
       // should succeed on string parameters

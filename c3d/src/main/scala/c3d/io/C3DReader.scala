@@ -76,6 +76,7 @@ object C3DReader {
 
   /** Concrete case-class implementation of a C3D top-level object. */
   private [io] final case class ReadC3D(
+    source: String,
     parameterSection: ParameterSection,
     dataSection: FormattedByteIndexedSeq) extends C3D
   {
@@ -91,23 +92,24 @@ object C3DReader {
     */
   def read(file: File): C3D = {
     FileUtils.fileToIndexedSeq(file) match {
-      case scala.util.Success(c3dISeq) => read(c3dISeq)
+      case scala.util.Success(c3dISeq) => read(file.getCanonicalFile().getName, c3dISeq)
       case scala.util.Failure(e)       => throw e
     }
   }
 
   /** Reads a C3D file from an `IndexedSeq[Byte]`.
     * 
+    * @param source source (file) information
     * @param c3dISeq `IndexedSeq[Byte]` representing the entire C3D file.
     * @return the C3D file that has been read
     */
-  def read(c3dISeq: IndexedSeq[Byte]): C3D = {
+  def read(source: String, c3dISeq: IndexedSeq[Byte]): C3D = {
     // read groups and parameters (the parameter section)
     val parameterSection = ParamSectionReader.read(getParameterSection(c3dISeq))
     val dataSection = getDataSection(c3dISeq, parameterSection)
 
     // assemble C3D object
-    ReadC3D(parameterSection, dataSection)
+    ReadC3D(source, parameterSection, dataSection)
   }
 
 }

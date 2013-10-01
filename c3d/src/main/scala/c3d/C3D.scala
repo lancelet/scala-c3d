@@ -115,6 +115,7 @@ trait Point extends IndexedSeq[Option[Vec3D]] {
 trait Points {
   def points: IndexedSeq[Point]
   def getPointByName(name: String): Option[Point]
+  def getPointByDescription(description: String): Option[Point]
   def rate: Float
   def totalSamples: Int
 }
@@ -131,9 +132,10 @@ trait C3D {
   def analog: Analog
   def platforms: Platforms
   def points: Points
+  def source: String
 }
 
 object C3D {
   def read(file: File): C3D = c3d.io.C3DReader.read(file)
-  def read(c3dISeq: IndexedSeq[Byte]): C3D = c3d.io.C3DReader.read(c3dISeq)
+  def read(c3dISeq: IndexedSeq[Byte]): C3D = c3d.io.C3DReader.read("(unknown source)", c3dISeq)
 }

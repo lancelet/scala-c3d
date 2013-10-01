@@ -1,6 +1,8 @@
 package c3d.io
 
+import scala.annotation.tailrec
 import scala.collection.immutable._
+import scala.collection.mutable.{Map => MMap}
 import c3d._
 
 private[io] final case class PointsReader(parameterSection: ParameterSection, dataSection: FormattedByteIndexedSeq)
@@ -8,10 +10,22 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
 
   def points: IndexedSeq[Point] = ReadPointsIndexedSeq
   def getPointByName(name: String): Option[Point] = pointMap.get(name.trim.toUpperCase)
+  def getPointByDescription(description: String): Option[Point] = descriptionMap.get(description.trim)
   def rate: Float = rp.pointRate
   def totalSamples: Int = rp.pointFrames  
   
   private lazy val pointMap: Map[String, Point] = points.map(c => (c.name.trim.toUpperCase, c)).toMap
+
+  private lazy val descriptionMap: Map[String, Point] = {
+    // ensure that we only keep the first instance of any given description
+    val mmap: MMap[String, Point] = MMap.empty[String, Point]
+    for {
+      p <- points
+      description = p.description.trim
+      if (!mmap.contains(description))
+    } mmap.put(description, p)
+    Map.empty[String, Point] ++ mmap
+  }
   
   private final case class ReadPoint(pointIndex: Int) extends Point {
 
@@ -44,7 +58,11 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
       def rate: Float = ReadPoint.this.rate
       val offset: Int = ReadPoint.this.indexWhere(_.isDefined)
       def length: Int = ReadPoint.this.lastIndexWhere(_.isDefined) - offset + 1
-      def apply(index: Int): Vec3D = ReadPoint.this.apply(index + offset).get  // TODO: requires gap filling
+      @tailrec def apply(index: Int): Vec3D = {
+        val ptOpt = ReadPoint.this.apply(index + offset)
+        // for temporary gap filling, we just go backward through the Point data until we find a valid value
+        if (ptOpt.isDefined) ptOpt.get else apply(index - 1)  // TODO: better gap filling
+      }
     }
     
     private def getDataByteIndex(sampleIndex: Int): Int = {
