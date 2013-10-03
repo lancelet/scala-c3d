@@ -3,7 +3,7 @@ import Keys._
 
 object CommonBuildSettings {
   val buildVersion       = "0.1-SNAPSHOT"
-  val buildScalaVersion  = "2.10.2"
+  val buildScalaVersion  = "2.10.3"
   val buildScalacOptions = Seq.empty[String]
 
   val commonBuildSettings = Defaults.defaultSettings ++ Seq(
