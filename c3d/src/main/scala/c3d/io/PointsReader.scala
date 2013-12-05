@@ -9,23 +9,35 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
   extends Points with DataReaderBase {
 
   def points: IndexedSeq[Point] = ReadPointsIndexedSeq
-  def getPointByName(name: String): Option[Point] = pointMap.get(name.trim.toUpperCase)
-  def getPointByDescription(description: String): Option[Point] = descriptionMap.get(description.trim)
+  def getPointByName(name: String): Option[Point] = nameMap.get(name.trim.toUpperCase)
+  def getPointByDescription(description: String): Option[Point] = descriptionMap.get(description.trim.toUpperCase)
   def rate: Float = rp.pointRate
   def totalSamples: Int = rp.pointFrames  
   
-  private lazy val pointMap: Map[String, Point] = points.map(c => (c.name.trim.toUpperCase, c)).toMap
-
-  private lazy val descriptionMap: Map[String, Point] = {
-    // ensure that we only keep the first instance of any given description
+  private lazy val nameMap: Map[String, Point] = {
+    // keep only the first instance of any given name where a point is actually defined
     val mmap: MMap[String, Point] = MMap.empty[String, Point]
     for {
-      p <- points
-      description = p.description.trim
+      p <- existingPoints
+      name = p.name.trim.toUpperCase
+      if (!mmap.contains(name))
+    } mmap.put(name, p)
+    Map.empty[String, Point] ++ mmap
+  } 
+    
+  private lazy val descriptionMap: Map[String, Point] = {
+    // keep only the first instance of any given description where a point is actually defined
+    val mmap: MMap[String, Point] = MMap.empty[String, Point]
+    for {
+      p <- existingPoints
+      description = p.description.trim.toUpperCase
       if (!mmap.contains(description))
     } mmap.put(description, p)
     Map.empty[String, Point] ++ mmap
   }
+
+  // existingPoints have at least one defined sample
+  private [this] val existingPoints: Seq[Point] = points.filter(_.exists(_.isDefined))
   
   private final case class ReadPoint(pointIndex: Int) extends Point {
 
@@ -69,6 +81,7 @@ private[io] final case class PointsReader(parameterSection: ParameterSection, da
       assert((sampleIndex >= 0) && (sampleIndex < length), s"sampleIndex must satisfy: 0 <= sampleIndex < $length")
       (sampleIndex * DataStats.dataStride) + (pointIndex * 4 * DataStats.dataItemSize)
     }
+    
   }
   
   private final object ReadPointsIndexedSeq extends IndexedSeq[Point] {

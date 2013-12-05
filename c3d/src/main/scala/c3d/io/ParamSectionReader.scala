@@ -256,6 +256,7 @@ private [io] object ParamSectionReader {
     def getParameter[T:TypeTag](parameter: String, signed: ParameterSign = ParameterSign.Default,
       signConventions: ParameterSignConventions = ParameterSign.DefaultParameterSignConventions): Option[Parameter[T]] =
     {
+      synchronized {
       parameters.find(_.name.toUpperCase == parameter.toUpperCase) flatMap { p: Parameter[_] =>
         val expectedType: Option[Parameter.Type] = ParamSectionReader.typeToParameterType[T]
         expectedType.flatMap { t =>
@@ -280,6 +281,7 @@ private [io] object ParamSectionReader {
             None
           }
         }
+      }
       }
     }
     
