@@ -9,7 +9,8 @@ class AnalogReaderSpec extends FunSpec with C3DFileSource {
   import AnalogReader._
 
   private def analogReader(wholeFile: ImmutableArray[Byte]): AnalogReader = {
-    val parameterSection = ParamSectionReader.read(C3DReader.getParameterSection(wholeFile))
+    val (paramISeq, processorType) = C3DReader.getParameterSection(wholeFile)
+    val parameterSection = ParamSectionReader.read(paramISeq, processorType)
     val dataSection = C3DReader.getDataSection(wholeFile, parameterSection)
     AnalogReader(parameterSection, dataSection)
   }

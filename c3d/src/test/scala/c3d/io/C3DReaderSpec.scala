@@ -18,7 +18,7 @@ class C3DReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should extract the parameter section blocks correctly") {
-      val pb = getParameterSection(Sample08.EB015PI)
+      val (pb, processorType) = getParameterSection(Sample08.EB015PI)
       assert(pb.length === (9 * 512))
       assert(pb(0)           === b(0x01))
       assert(pb(1)           === b(0x50))

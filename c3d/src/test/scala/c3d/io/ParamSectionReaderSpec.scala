@@ -15,13 +15,13 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     import ParamSectionReader._
 
     it("should chunk the parameter section correctly into groups and parameters") {
-      val ps: FormattedByteIndexedSeq = C3DReader.getParameterSection(Sample08.EB015PI)
+      val (ps, procType) = C3DReader.getParameterSection(Sample08.EB015PI)
       val gp: Seq[FormattedByteIndexedSeq] = chunkGroupsAndParams(ps)
       assert(gp.length === 42)
     }
 
     it("should be able to partition groups and parameters") {
-      val ps: FormattedByteIndexedSeq = C3DReader.getParameterSection(Sample08.EB015PI)
+      val (ps, procType) = C3DReader.getParameterSection(Sample08.EB015PI)
       val gp: Seq[FormattedByteIndexedSeq] = chunkGroupsAndParams(ps)
       val gsps: (Seq[FormattedByteIndexedSeq], Seq[FormattedByteIndexedSeq]) = partitionToGroupsAndParams(gp)
       val groups = gsps._1
@@ -31,7 +31,7 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should be able to construct unassociated groups") {
-      val ps: FormattedByteIndexedSeq = C3DReader.getParameterSection(Sample08.EB015PI)
+      val (ps, procType) = C3DReader.getParameterSection(Sample08.EB015PI)
       val gp: Seq[FormattedByteIndexedSeq] = chunkGroupsAndParams(ps)
       val gsps: (Seq[FormattedByteIndexedSeq], Seq[FormattedByteIndexedSeq]) = partitionToGroupsAndParams(gp)
       val groups = gsps._1.map(new UnassociatedGroup(_))
@@ -44,7 +44,7 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should be able to construct unassociated, untyped parameters") {
-      val ps: FormattedByteIndexedSeq = C3DReader.getParameterSection(Sample08.EB015PI)
+      val (ps, procType) = C3DReader.getParameterSection(Sample08.EB015PI)
       val gp: Seq[FormattedByteIndexedSeq] = chunkGroupsAndParams(ps)
       val gsps: (Seq[FormattedByteIndexedSeq], Seq[FormattedByteIndexedSeq]) = partitionToGroupsAndParams(gp)
       val params = gsps._2.map(new UntypedParameter(_))
@@ -72,7 +72,7 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should be able to construct unassociated, typed parameters") {
-      val ps: FormattedByteIndexedSeq = C3DReader.getParameterSection(Sample08.EB015PI)
+      val (ps, procType) = C3DReader.getParameterSection(Sample08.EB015PI)
       val gp: Seq[FormattedByteIndexedSeq] = chunkGroupsAndParams(ps)
       val gsps: (Seq[FormattedByteIndexedSeq], Seq[FormattedByteIndexedSeq]) = partitionToGroupsAndParams(gp)
       val params = gsps._2.map(new UntypedParameter(_).asUnassociatedParameter)
@@ -101,7 +101,8 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should read in the entire parameter section") {
-      val ps: ParameterSection = read(C3DReader.getParameterSection(Sample08.EB015PI))
+      val (paramISeq, processorType) = C3DReader.getParameterSection(Sample08.EB015PI)
+      val ps = read(paramISeq, processorType)
 
       def get(name: String): Group = ps.groups.find(_.name == name).get
       def getp[T](group: String, name: String): Parameter[T] = get(group).parameters.
@@ -129,7 +130,8 @@ class ParamSectionReaderSpec extends FunSpec with C3DFileSource {
     }
 
     it("should be able to read parameters stored with zero dimensions (scalars)") {
-      val ps: ParameterSection = read(C3DReader.getParameterSection(Sample08.EB015PI))
+      val (paramISeq, processorType) = C3DReader.getParameterSection(Sample08.EB015PI)
+      val ps: ParameterSection = read(paramISeq, processorType)
       val groups: Seq[Group] = ps.groups
       val analog: Group = groups.find(_.name == "ANALOG").getOrElse(fail())
       val used: Parameter[Int] = analog.parameters.find(_.name == "USED").getOrElse(fail()).

@@ -26,7 +26,7 @@ object C3DReader {
   
   
   /** Fetches the parameter section from the file. */
-  private [io] def getParameterSection(wholeFile: ImmutableArray[Byte]): FormattedByteIndexedSeq = {
+  private [io] def getParameterSection(wholeFile: ImmutableArray[Byte]): (FormattedByteIndexedSeq, ProcessorType) = {
     
     val section: ImmutableArray[Byte] = {
       val ofs  = (wholeFile(0) - 1) * sectionSize  // first byte is 1-based offset of parameter section
@@ -40,7 +40,7 @@ object C3DReader {
     )
     
     val binaryFormat = BinaryFormat.fromProcessorType(processorType)
-    new FormattedByteIndexedSeq(section, binaryFormat)
+    (new FormattedByteIndexedSeq(section, binaryFormat), processorType)
     
   }
 
@@ -105,7 +105,8 @@ object C3DReader {
     */
   def read(source: String, c3dArray: ImmutableArray[Byte]): C3D = {
     // read groups and parameters (the parameter section)
-    val parameterSection = ParamSectionReader.read(getParameterSection(c3dArray))
+    val (paramISeq, processorType) = getParameterSection(c3dArray)
+    val parameterSection = ParamSectionReader.read(paramISeq, processorType)
     val dataSection = getDataSection(c3dArray, parameterSection)
 
     // assemble C3D object

@@ -372,9 +372,9 @@ private [io] object ParamSectionReader {
   
   
   /** Read in the entire parameter section. */
-  private [io] def read(paramISeq: FormattedByteIndexedSeq): ParameterSection = {
+  private [io] def read(paramISeq: FormattedByteIndexedSeq, processorType: ProcessorType): ParameterSection = {
     val groups = readGroups(paramISeq)
-    ReadParameterSection(groups, paramISeq.binaryFormat.processorType)
+    ReadParameterSection(groups, processorType)
   }  
   
 }

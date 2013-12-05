@@ -8,7 +8,8 @@ import c3d.io.collection.ImmutableArray
 class PointsReaderSpec extends FunSpec with C3DFileSource {
 
   private def pointsReader(wholeFile: ImmutableArray[Byte]): PointsReader = {
-    val parameterSection = ParamSectionReader.read(C3DReader.getParameterSection(wholeFile))
+    val (paramISeq, processorType) = C3DReader.getParameterSection(wholeFile)
+    val parameterSection = ParamSectionReader.read(paramISeq, processorType)
     val dataSection = C3DReader.getDataSection(wholeFile, parameterSection)
     PointsReader(parameterSection, dataSection)
   }
