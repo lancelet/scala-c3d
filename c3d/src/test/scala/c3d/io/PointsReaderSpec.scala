@@ -3,10 +3,11 @@ package c3d.io
 import scala.collection.immutable._
 import org.scalatest.FunSpec
 import c3d._
+import c3d.io.collection.ImmutableArray
 
 class PointsReaderSpec extends FunSpec with C3DFileSource {
 
-  private def pointsReader(wholeFile: IndexedSeq[Byte]): PointsReader = {
+  private def pointsReader(wholeFile: ImmutableArray[Byte]): PointsReader = {
     val parameterSection = ParamSectionReader.read(C3DReader.getParameterSection(wholeFile))
     val dataSection = C3DReader.getDataSection(wholeFile, parameterSection)
     PointsReader(parameterSection, dataSection)

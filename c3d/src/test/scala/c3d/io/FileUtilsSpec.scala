@@ -2,6 +2,7 @@ package c3d.io
 
 import java.io.{File, IOException}
 import org.scalatest.FunSpec
+import c3d.io.collection.ImmutableArray
 
 class FileUtilsSpec extends FunSpec {
 
@@ -21,7 +22,7 @@ class FileUtilsSpec extends FunSpec {
           cancel("File ./c3d.org-example-files/sample08/EB015PI.c3d not found.  " +
             "You must run the fetch-c3d-example-files sbt task.")
         }
-        val iseq: IndexedSeq[Byte] = FileUtils.fileToIndexedSeq(eb015pi) recover { 
+        val iseq: ImmutableArray[Byte] = FileUtils.fileToIndexedSeq(eb015pi) recover {
           case err => fail(s"Could not read file: ${err}") 
         } getOrElse { fail("Should not reach this code.") }
         assert(iseq.length  === 156672)

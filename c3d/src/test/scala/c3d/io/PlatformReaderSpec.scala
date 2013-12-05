@@ -3,12 +3,13 @@ package c3d.io
 import scala.collection.immutable._
 import org.scalatest.FunSpec
 import c3d._
+import c3d.io.collection.ImmutableArray
 
 class PlatformReaderSpec extends FunSpec with C3DFileSource {
 
   import PlatformReader._
   
-  private def platformReader(wholeFile: IndexedSeq[Byte]): PlatformReader = {
+  private def platformReader(wholeFile: ImmutableArray[Byte]): PlatformReader = {
     val parameterSection = ParamSectionReader.read(C3DReader.getParameterSection(wholeFile))
     val dataSection = C3DReader.getDataSection(wholeFile, parameterSection)
     val analog = AnalogReader(parameterSection, dataSection)

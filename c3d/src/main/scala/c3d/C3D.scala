@@ -3,6 +3,7 @@ package c3d
 import java.io.File
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
+import c3d.io.collection.ImmutableArray
 
 trait Parameter[T] {
   def name: String
@@ -137,5 +138,5 @@ trait C3D {
 
 object C3D {
   def read(file: File): C3D = c3d.io.C3DReader.read(file)
-  def read(c3dISeq: IndexedSeq[Byte]): C3D = c3d.io.C3DReader.read("(unknown source)", c3dISeq)
+  def read(c3dArray: ImmutableArray[Byte]): C3D = c3d.io.C3DReader.read("(unknown source)", c3dArray)
 }
