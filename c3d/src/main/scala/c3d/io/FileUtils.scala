@@ -1,8 +1,8 @@
 package c3d.io
 
 import java.io.{DataInputStream, File, FileInputStream, IOException}
-import scala.collection.immutable._
 import scala.util.{Failure, Success, Try}
+import c3d.io.collection.ImmutableArray
 
 private [io] object FileUtils {
 
@@ -19,7 +19,7 @@ private [io] object FileUtils {
     * @param inFile input file
     * @return Attempt to read the file to an `IndexedSeq[Byte]`.
     */
-  def fileToIndexedSeq(inFile: File): Try[IndexedSeq[Byte]] = {
+  def fileToIndexedSeq(inFile: File): Try[ImmutableArray[Byte]] = {
     Try {
       if (inFile.length > Int.MaxValue)
         throw new IOException(s"File length exceeds ${Int.MaxValue} - too large to read.")
@@ -35,7 +35,7 @@ private [io] object FileUtils {
         }
       } map { _ =>
         dataInputStream.close()
-        WrappedArrayIndexedSeq(byteArray)
+        ImmutableArray(byteArray)
       }
     }
   }

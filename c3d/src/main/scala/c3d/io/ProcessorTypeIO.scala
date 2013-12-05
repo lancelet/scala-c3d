@@ -1,6 +1,6 @@
 package c3d.io
 
-import scala.collection.immutable._
+import scala.collection.immutable.Map
 import c3d.ProcessorType
 import Util.b
 

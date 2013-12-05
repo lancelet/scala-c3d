@@ -36,7 +36,7 @@ private[io] final case class AnalogReader(parameterSection: ParameterSection, da
         DataStats.pointBlockSize +                   // skip over 3D point data for this frame
         offsetWithinFrame * DataStats.analogStride + // skip over any preceding analog blocks within the frame
         channelIndex * DataStats.dataItemSize        // find the correct channel
-        )
+      )
     }
 
   }

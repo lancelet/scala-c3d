@@ -6,6 +6,7 @@ import scala.math.abs
 import scala.reflect.runtime.universe._
 import c3d._
 import Util.b
+import c3d.io.collection.ImmutableArray
 
 private [io] object ParamSectionReader {
 
@@ -142,7 +143,7 @@ private [io] object ParamSectionReader {
     private def nElem: Int = abs(byteLengthPerElement)                        // # of bytes in an element of the data
     private def nDims: Int = block(5 + nName)                                 // number of dimensions
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
-    def description: String = block.slice(descOfs, descOfs + nDesc).map(_.toChar).mkString
+    def description: String = if (nDesc > 0) block.slice(descOfs, descOfs + nDesc).map(_.toChar).mkString else ""
     def groupId: Int = { assert(block(1) > 0); block(1) }
     def dimensions: IndexedSeq[Int] = {
       if (nDims == 0) { // handle the case of a "scalar" dimension, where nDims is recorded as zero in the C3D file
@@ -293,7 +294,7 @@ private [io] object ParamSectionReader {
     name:          String, 
     description:   String, 
     isLocked:      Boolean, 
-    dimensions:    IndexedSeq[Int], 
+    dimensions:    IndexedSeq[Int],
     data:          IndexedSeq[T],
     parameterType: Parameter.Type
   ) extends Parameter[T] with ParameterTemplate[T]
@@ -313,8 +314,8 @@ private [io] object ParamSectionReader {
     def getParamsForGroup(g: UnassociatedGroup): Seq[Parameter[_]] = {
       for (p <- uParams if p.groupId == g.id) yield ReadParameter(
         p.name, p.description, p.isLocked,
-        WrappedArrayIndexedSeq(p.dimensions.toArray),
-        WrappedArrayIndexedSeq(p.data.toArray),
+        p.dimensions,
+        p.data,
         p.parameterType
       )
     }
@@ -371,9 +372,9 @@ private [io] object ParamSectionReader {
   
   
   /** Read in the entire parameter section. */
-  private [io] def read(paramISeq: FormattedByteIndexedSeq): ParameterSection = {
+  private [io] def read(paramISeq: FormattedByteIndexedSeq, processorType: ProcessorType): ParameterSection = {
     val groups = readGroups(paramISeq)
-    ReadParameterSection(groups, paramISeq.binaryFormat.processorType)
+    ReadParameterSection(groups, processorType)
   }  
   
 }

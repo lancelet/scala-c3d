@@ -14,7 +14,7 @@ lazy val c3d = project settings (
     Common.scalatest,
     Common.ejml
   ),
-  parallelExecution in Test := false   // SI-6240; should be fixed in Scala 2.11
+  parallelExecution in test := false   // SI-6240; should be fixed in Scala 2.11
 )
 
 //-----------------------------------------------------------------------------

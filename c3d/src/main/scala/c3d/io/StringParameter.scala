@@ -2,6 +2,7 @@ package c3d.io
 
 import scala.collection.immutable._
 import c3d.Parameter
+import c3d.io.collection.ImmutableArray
 
 /** Converts a [[Parameter[Char]]] to a [[Parameter[String]]].
   * 

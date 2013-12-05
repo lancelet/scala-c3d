@@ -18,7 +18,7 @@ import c3d.Parameter
 private [io] trait ParameterTemplate[T] extends Parameter[T] {
 
   // cumulative product of all dimensions
-  private lazy val cprod: Array[Int] = dimensions.scanLeft(1)(_ * _).drop(1).toArray
+  private lazy val cprod: Array[Int] = dimensions.toIndexedSeq.scanLeft(1)(_ * _).drop(1).toArray
 
   /** Checks the range of an index and throws an `IndexOutOfBoundsException` if it is invalid.
     * 

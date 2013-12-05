@@ -5,6 +5,7 @@ import c3d._
 import scala.collection.immutable._
 import scala.reflect.runtime.universe._
 import Util.b
+import c3d.io.collection.ImmutableArray
 
 object C3DReader {
 
@@ -25,9 +26,9 @@ object C3DReader {
   
   
   /** Fetches the parameter section from the file. */
-  private [io] def getParameterSection(wholeFile: IndexedSeq[Byte]): FormattedByteIndexedSeq = {
+  private [io] def getParameterSection(wholeFile: ImmutableArray[Byte]): (FormattedByteIndexedSeq, ProcessorType) = {
     
-    val section: IndexedSeq[Byte] = {
+    val section: ImmutableArray[Byte] = {
       val ofs  = (wholeFile(0) - 1) * sectionSize  // first byte is 1-based offset of parameter section
       val nsec = wholeFile(ofs + 2)                // 3rd byte of parameter section is the number of sections
       val until = ofs + (sectionSize * nsec)
@@ -39,16 +40,15 @@ object C3DReader {
     )
     
     val binaryFormat = BinaryFormat.fromProcessorType(processorType)
-    new FormattedByteIndexedSeq(section, binaryFormat)
+    (new FormattedByteIndexedSeq(section, binaryFormat), processorType)
     
   }
 
   
   /** Fetches the data section of the file (3D point data + analog data). */
-  private[io] def getDataSection(
-    wholeFile: IndexedSeq[Byte],
-    parameterSection: ParameterSection): FormattedByteIndexedSeq = {
-    
+  private[io] def getDataSection(wholeFile: ImmutableArray[Byte],
+                                 parameterSection: ParameterSection): FormattedByteIndexedSeq =
+  {
     val rp = parameterSection.requiredParameters
 
     // figure out total size of data section
@@ -65,7 +65,7 @@ object C3DReader {
 
     // slice region corresponding to the data section
     val startIndex: Int = (rp.pointDataStart - 1) * sectionSize
-    val slice: IndexedSeq[Byte] = wholeFile.slice(startIndex, startIndex + totalDataSectionBytes)
+    val slice: ImmutableArray[Byte] = wholeFile.slice(startIndex, startIndex + totalDataSectionBytes)
 
     // convert to a FormattedByteIndexedSeq
     val binaryFormat = BinaryFormat.fromProcessorType(parameterSection.processorType)
@@ -92,21 +92,22 @@ object C3DReader {
     */
   def read(file: File): C3D = {
     FileUtils.fileToIndexedSeq(file) match {
-      case scala.util.Success(c3dISeq) => read(file.getCanonicalFile().getName, c3dISeq)
-      case scala.util.Failure(e)       => throw e
+      case scala.util.Success(c3dArray) => read(file.getCanonicalFile().getName, c3dArray)
+      case scala.util.Failure(e)        => throw e
     }
   }
 
   /** Reads a C3D file from an `IndexedSeq[Byte]`.
     * 
     * @param source source (file) information
-    * @param c3dISeq `IndexedSeq[Byte]` representing the entire C3D file.
+    * @param c3dArray `IndexedSeq[Byte]` representing the entire C3D file.
     * @return the C3D file that has been read
     */
-  def read(source: String, c3dISeq: IndexedSeq[Byte]): C3D = {
+  def read(source: String, c3dArray: ImmutableArray[Byte]): C3D = {
     // read groups and parameters (the parameter section)
-    val parameterSection = ParamSectionReader.read(getParameterSection(c3dISeq))
-    val dataSection = getDataSection(c3dISeq, parameterSection)
+    val (paramISeq, processorType) = getParameterSection(c3dArray)
+    val parameterSection = ParamSectionReader.read(paramISeq, processorType)
+    val dataSection = getDataSection(c3dArray, parameterSection)
 
     // assemble C3D object
     ReadC3D(source, parameterSection, dataSection)

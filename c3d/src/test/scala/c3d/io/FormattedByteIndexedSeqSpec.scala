@@ -3,12 +3,13 @@ package c3d.io
 import scala.collection.immutable._
 import org.scalatest.FunSpec
 import Util.b
+import c3d.io.collection.ImmutableArray
 
 class FormattedByteIndexedSeqSpec extends FunSpec {
 
   describe("FormattedByteIndexedSeq") {
 
-    def testSeq: IndexedSeq[Byte] = { 
+    def testSeq: ImmutableArray[Byte] = {
       val iis = IndexedSeq[Int](
         0xC3, 0x7B, 0x14, 0xC0, // Intel float -2.3200538f
         0x0C, 0xFF,             // Intel signed int -244
@@ -16,7 +17,7 @@ class FormattedByteIndexedSeqSpec extends FunSpec {
         0x0C, 0xFF,             // Intel unsigned int 65292
         0x36, 0x07              // Intel unsigned int 1846
       )
-      iis map (b(_))
+      ImmutableArray(iis.map(b(_)).toArray)
     }
     def testfb: FormattedByteIndexedSeq = new FormattedByteIndexedSeq(testSeq, BinaryFormat.Intel)
 
