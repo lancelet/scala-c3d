@@ -2,6 +2,7 @@ package c3d.io.collection
 
 import org.scalatest.FunSpec
 import org.scalautils.Equality
+import c3d.io.Util.b
 
 class ImmutableArraySpec extends FunSpec {
 
@@ -42,7 +43,7 @@ class ImmutableArraySpec extends FunSpec {
     }
 
     it ("should permit element access") {
-      val ia = ImmutableArray[Byte](1.toByte, 2.toByte, 3.toByte)
+      val ia = ImmutableArray[Byte](b(1), b(2), b(3))
       assert(ia(0) === 1)
       assert(ia(1) === 2)
       assert(ia(2) === 3)
