@@ -1,26 +1,72 @@
+/**
+ *    __ __  __
+ *   /    _)|  \
+ *   \__ __)|__/  for SCALA!
+ *
+ * This file is part of the scala-c3d library.  This library is distributed under the Apache 2.0 license (ALv2).
+ * Copyright (C) 2013 Dr Jonathan S Merritt.
+ */
+
 package c3d.io.collection
 
 import scala.collection.immutable.IndexedSeq
 import scala.reflect.ClassTag
+import c3d.ProcessorType
 
 /**
  * Immutable array wrapper.
  *
- * Instances of this trait wrap arrays, providing a read-only, immutable interface.  When <code>ImmutableArray</code>
- * traits are instantiated, the array to be wrapped must be copied defensively <it>by the caller</it> if there is a
- * possibility that it might be modified.  The <code>ImmutableArray</code> wrapper never performs defensive copying
+ * Instances of this trait wrap arrays, providing a read-only, immutable interface.  When `ImmutableArray`
+ * traits are instantiated, the array to be wrapped must be copied defensively ''by the caller'' if there is a
+ * possibility that it might be modified.  The `ImmutableArray` wrapper never performs defensive copying
  * itself.
  *
- * An <code>ImmutableArray</code> can be constructed by calling the <code>apply()</code> methods on the companion
- * object.
+ * An `ImmutableArray` can be constructed using methods on its companion object.  For example
+ * {{{
+ *   val a = ImmutableArray(1, 2, 3)
+ *   val b = ImmutableArray(Array(1, 2, 3))
+ * }}}
  *
  * @tparam T type of the array
  */
-trait ImmutableArray[@specialized(Byte) T] { outer =>
+trait ImmutableArray[@specialized(Byte) T] {
+
+  /**
+   * Gets an element from the array.
+   *
+   * @param index element index
+   * @return element
+   */
   def apply(index: Int): T
+
+  /**
+   * Returns the length of the array.
+   * @return length of the array
+   */
   def length: Int
+
+  /**
+   * Slices into the array.
+   *
+   * Slices are produced by wrapping the original array using an offset, not by copying any part of the array.  An
+   * `IllegalArgumentException` will be thrown if any of the slice indices are invalid.
+   *
+   * @param from start index of the slice (first valid index)
+   * @param until one past the last valid index of the slice
+   * @return sliced array
+   */
   def slice(from: Int, until: Int): ImmutableArray[T]
+
+  /**
+   * Converts the array to an `IndexedSeq`.
+   *
+   * This method may carry a performance implication, since the returned `IndexedSeq` may then box values that are
+   * accessed.
+   *
+   * @return indexed sequence
+   */
   def toIndexedSeq: IndexedSeq[T]
+
 }
 
 object ImmutableArray {
@@ -77,6 +123,8 @@ object ImmutableArray {
       }
     }
     def toIndexedSeq: IndexedSeq[T] = new IndexedSeqIA[T](this)
+    def forProcessor(p: ProcessorType)(implicit ev: T =:= Byte): FormattedByteArray =
+      FormattedByteArray(this.asInstanceOf[IA[Byte]], p)
   }
 
   /** Basic ImmutableArray, with no slicing over the underlying array. */
