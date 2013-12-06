@@ -31,7 +31,10 @@ object ChunkedParamBlock {
   def apply(c: C3DBlock): ChunkedParamBlock = new DefaultChunkedParamBlock(c)
 
   /**
-   * Parameter block chunk.  A chunk from the parameter block can represent either a group or a parameter.
+   * Parameter block chunk.
+   *
+   * A chunk from the parameter block can represent either a group or a parameter.  Parameter block chunks should be
+   * created from a `C3DBlock` using the `ChunkedParamBlock` companion object.
    */
   trait PBChunk {
 
