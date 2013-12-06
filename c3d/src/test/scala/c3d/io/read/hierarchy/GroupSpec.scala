@@ -21,7 +21,7 @@ class GroupSpec extends FunSpec with C3DFileSource {
     pb.filter(_.isGroup).map(Group(_))
   }
 
-  describe("A GroupBlock") {
+  describe("A Group") {
 
     it("fetches locks") {
       val expected = List(false, false, false, false, false)

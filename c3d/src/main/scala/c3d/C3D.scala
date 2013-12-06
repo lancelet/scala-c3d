@@ -22,11 +22,11 @@ trait Parameter[T] {
 object Parameter {
   sealed trait Type
   object Type {
-    object String extends Type
-    object Character extends Type
-    object Byte extends Type
-    object Integer extends Type
-    object Float extends Type
+    object String extends Type    { override def toString = "String" }
+    object Character extends Type { override def toString = "Character" }
+    object Byte extends Type      { override def toString = "Byte" }
+    object Integer extends Type   { override def toString = "Integer" }
+    object Float extends Type     { override def toString = "Float" }
   }
 }
 
