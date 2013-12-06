@@ -13,12 +13,12 @@ import org.scalatest.FunSpec
 import c3d.io.C3DFileSource
 
 
-class GroupBlockSpec extends FunSpec with C3DFileSource {
+class GroupSpec extends FunSpec with C3DFileSource {
 
-  private def testGroupBlocks: IndexedSeq[GroupBlock] = {
+  private def testGroupBlocks: IndexedSeq[Group] = {
     val c3dBlock = C3DBlock("EB015PI", Sample08.EB015PI)
     val pb = ChunkedParamBlock(c3dBlock)
-    pb.filter(_.isGroup).map(GroupBlock(_))
+    pb.filter(_.isGroup).map(Group(_))
   }
 
   describe("A GroupBlock") {

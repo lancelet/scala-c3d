@@ -12,7 +12,7 @@ package c3d.io.read.hierarchy
 /**
  * A group.
  */
-trait GroupBlock {
+trait Group {
 
   /** Checks whether the group is locked. */
   def isLocked: Boolean
@@ -28,7 +28,7 @@ trait GroupBlock {
 
 }
 
-object GroupBlock {
+object Group {
 
   /**
    * Creates a group block from a chunked parameter block.
@@ -38,9 +38,9 @@ object GroupBlock {
    * @param chunk chunk from which to create a group block
    * @return group block
    */
-  def apply(chunk: ChunkedParamBlock.PBChunk): GroupBlock = new DefaultGroupBlock(chunk)
+  def apply(chunk: ChunkedParamBlock.PBChunk): Group = new DefaultGroup(chunk)
 
-  private final class DefaultGroupBlock(chunk: ChunkedParamBlock.PBChunk) extends GroupBlock {
+  private final class DefaultGroup(chunk: ChunkedParamBlock.PBChunk) extends Group {
     assert(chunk.isGroup, "attempted to create a group from a parameter chunk")
 
     private def nDesc: Int     = chunk.data(4 + name.length) & 0xFFFF
