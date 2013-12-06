@@ -19,7 +19,7 @@ private [io] object FileUtils {
     * @param inFile input file
     * @return Attempt to read the file to an `IndexedSeq[Byte]`.
     */
-  def fileToIndexedSeq(inFile: File): Try[ImmutableArray[Byte]] = {
+  def fileToImmutableArray(inFile: File): Try[ImmutableArray[Byte]] = {
     Try {
       if (inFile.length > Int.MaxValue)
         throw new IOException(s"File length exceeds ${Int.MaxValue} - too large to read.")

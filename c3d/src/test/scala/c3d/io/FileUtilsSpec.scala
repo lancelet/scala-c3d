@@ -13,7 +13,7 @@ class FileUtilsSpec extends FunSpec {
       it("should fail to load a non-existent file") {
         val nonExistentFile = new File("./c3d.org-example-files/NotAFile.c3d.NOT")
         assert(nonExistentFile.exists === false, "Supposedly non-existent file really exists!  Check test code.")
-        assert(FileUtils.fileToIndexedSeq(nonExistentFile).isFailure)
+        assert(FileUtils.fileToImmutableArray(nonExistentFile).isFailure)
       }
 
       it("should correctly load an example C3D file") {
@@ -22,7 +22,7 @@ class FileUtilsSpec extends FunSpec {
           cancel("File ./c3d.org-example-files/sample08/EB015PI.c3d not found.  " +
             "You must run the fetch-c3d-example-files sbt task.")
         }
-        val iseq: ImmutableArray[Byte] = FileUtils.fileToIndexedSeq(eb015pi) recover {
+        val iseq: ImmutableArray[Byte] = FileUtils.fileToImmutableArray(eb015pi) recover {
           case err => fail(s"Could not read file: ${err}") 
         } getOrElse { fail("Should not reach this code.") }
         assert(iseq.length  === 156672)

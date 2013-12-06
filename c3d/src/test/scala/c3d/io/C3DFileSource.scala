@@ -12,7 +12,7 @@ trait C3DFileSource { self: Assertions =>
   }
 
   private def fetchOrCancel(fileName: String): ImmutableArray[Byte] =
-    FileUtils.fileToIndexedSeq(new File(fileName)) getOrElse { cancelWithName(fileName) }
+    FileUtils.fileToImmutableArray(new File(fileName)) getOrElse { cancelWithName(fileName) }
 
   object Sample01 {
     def EB015PI: ImmutableArray[Byte] = fetchOrCancel("./c3d.org-example-files/sample01/Eb015pi.c3d")

@@ -85,7 +85,7 @@ object C3DBlock {
    * @param file file to read
    * @return c3d block
    */
-  def apply(file: File): C3DBlock = FileUtils.fileToIndexedSeq(file) match {
+  def apply(file: File): C3DBlock = FileUtils.fileToImmutableArray(file) match {
     case Success(wholeFile) => apply(file.getCanonicalFile.getName, wholeFile)
     case Failure(e)         => throw e
   }

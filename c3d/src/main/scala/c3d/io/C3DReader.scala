@@ -91,7 +91,7 @@ object C3DReader {
     * return the C3D file that has been read
     */
   def read(file: File): C3D = {
-    FileUtils.fileToIndexedSeq(file) match {
+    FileUtils.fileToImmutableArray(file) match {
       case scala.util.Success(c3dArray) => read(file.getCanonicalFile().getName, c3dArray)
       case scala.util.Failure(e)        => throw e
     }
