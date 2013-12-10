@@ -9,6 +9,7 @@
 
 package c3d.io.read.hierarchy
 
+import scala.collection.immutable.IndexedSeq
 import c3d.io.collection.ImmutableArray
 
 /**
