@@ -97,7 +97,9 @@ private [io] object ParamSectionReader {
     private val nName: Int = abs(block(0))              // # of characters in name
     private val nDesc: Int = block(4 + nName) & 0xFFFF  // # of characters in description
     def name: String = block.slice(2, 2 + nName).map(_.toChar).mkString
-    def description: String = block.slice(5 + nName, 5 + nName + nDesc).map(_.toChar).mkString
+    def description: String = if (nDesc > 0) {
+      block.slice(5 + nName, 5 + nName + nDesc).map(_.toChar).mkString
+    } else { "" }
     def id: Int = { assert(block(1) < 0); -block(1) }  // ID of a group must be negative
     def isLocked: Boolean = block(0) < 0
 
