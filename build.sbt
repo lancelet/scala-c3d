@@ -46,6 +46,19 @@ lazy val `xml-test-suite` = project settings (
 
 //-----------------------------------------------------------------------------
 
+lazy val `viewer` = project settings (
+  version := Common.version,
+  scalaVersion := Common.buildScalaVersion,
+  libraryDependencies ++= List(
+    Common.scalatest
+  ),
+  parallelExecution in Test := false   // SI-6240; should be fixed in Scala 2.11
+) dependsOn (
+  c3d
+)
+
+//-----------------------------------------------------------------------------
+
 val `fetch-c3d-example-files` = TaskKey[Unit](
   "fetch-c3d-example-files",
   "Fetches and unzips example C3D files from the c3d.org website (used for testing)"
