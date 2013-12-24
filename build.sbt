@@ -52,6 +52,7 @@ lazy val `viewer` = project settings (
   libraryDependencies ++= List(
     Common.scalatest
   ),
+  fork in run := true,
   parallelExecution in Test := false   // SI-6240; should be fixed in Scala 2.11
 ) dependsOn (
   c3d

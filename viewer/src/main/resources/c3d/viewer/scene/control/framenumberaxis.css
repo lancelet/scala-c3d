@@ -1,0 +1,4 @@
+.frame-number-axis {
+    -fx-skin: "c3d.viewer.scene.control.skin.FrameNumberAxisSkin";
+    -tickhscaleforgap: 1.5;
+}
