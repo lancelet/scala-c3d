@@ -1,4 +1,7 @@
 .frame-number-axis {
     -fx-skin: "c3d.viewer.scene.control.skin.FrameNumberAxisSkin";
-    -tickhscaleforgap: 1.5;
+    -tickhscaleforgap: 1.6;
+    -fx-font-size: 16;
+    -fx-text-fill: rgb(160,203,191);
+    -fx-effect: dropshadow(one-pass-box, -fx-text-fill, 5, 0.2, 0, 0);
 }

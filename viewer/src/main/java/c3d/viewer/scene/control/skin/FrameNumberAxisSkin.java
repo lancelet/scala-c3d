@@ -86,7 +86,7 @@ public class FrameNumberAxisSkin extends SkinBase<FrameNumberAxis> {
     private void updateMajorTick() {
         double nCanFit = rootPane.getWidth() / getLabelWidth();
         if (nCanFit < 1) {
-            control.setMajorTick(1);
+            control.setMajorTick(-1);
             return;
         }
         double rawTick = getRange() / nCanFit;
@@ -113,12 +113,16 @@ public class FrameNumberAxisSkin extends SkinBase<FrameNumberAxis> {
         dummyText.setFont(control.getFont());
         dummyText.setText("8");
         rootPane.setPrefHeight(dummyText.getLayoutBounds().getHeight());
+        // if we can't render any ticks, return now
+        if (control.getMajorTick() < 1) {
+            return;
+        }
         // Render ticks in canvas (majorTick size should already be set)
         final GraphicsContext g = canvas.getGraphicsContext2D();
         // Clear canvas
         g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         // Fill dummy rect
-        if (true) {
+        if (false) {
             g.setFill(Color.RED);
             g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         }
