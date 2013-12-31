@@ -1,6 +1,6 @@
 package c3d.viewer.scene.control.skin;
 
-import c3d.viewer.scene.control.FrameNumberAxis;
+import c3d.viewer.scene.control.OldFrameNumberAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Bounds;
@@ -14,15 +14,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 
-public class FrameNumberAxisSkin extends SkinBase<FrameNumberAxis> {
+public class OldFrameNumberAxisSkin extends SkinBase<OldFrameNumberAxis> {
 
-    public FrameNumberAxisSkin(FrameNumberAxis control) {
+    public OldFrameNumberAxisSkin(OldFrameNumberAxis control) {
         super(control);
         this.control = control;
         initialize();
     }
 
-    private final FrameNumberAxis control;
+    private final OldFrameNumberAxis control;
 
     private final Pane rootPane = new Pane();
     private final Canvas canvas = new Canvas();

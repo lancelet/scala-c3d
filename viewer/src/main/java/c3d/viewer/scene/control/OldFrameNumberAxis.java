@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class FrameNumberAxis extends Control {
+public class OldFrameNumberAxis extends Control {
 
     /***************************************************************************
      *                                                                         *
@@ -19,7 +19,7 @@ public class FrameNumberAxis extends Control {
      *                                                                         *
      **************************************************************************/
 
-    public FrameNumberAxis() {
+    public OldFrameNumberAxis() {
         initialize();
     }
 
@@ -92,45 +92,45 @@ public class FrameNumberAxis extends Control {
 
     @Override
     protected String getUserAgentStylesheet() {
-        return this.getClass().getResource(this.getClass().getSimpleName().toLowerCase() + ".css").toString();
+        return this.getClass().getResource("framenumberaxis.css").toString();
     }
 
     private static final String DEFAULT_STYLE_CLASS = "frame-number-axis";
 
-    private static final FontCssMetaData<FrameNumberAxis> FONT_CSS_META_DATA =
-        new FontCssMetaData<FrameNumberAxis>("-fx-font", Font.getDefault()) {
+    private static final FontCssMetaData<OldFrameNumberAxis> FONT_CSS_META_DATA =
+        new FontCssMetaData<OldFrameNumberAxis>("-fx-font", Font.getDefault()) {
             @Override
-            public boolean isSettable(FrameNumberAxis frameNumberAxis) {
-                return !frameNumberAxis.font.isBound();
+            public boolean isSettable(OldFrameNumberAxis oldFrameNumberAxis) {
+                return !oldFrameNumberAxis.font.isBound();
             }
             @Override
-            public StyleableProperty<Font> getStyleableProperty(FrameNumberAxis frameNumberAxis) {
-                return (StyleableProperty<Font>)frameNumberAxis.font;
-            }
-        };
-
-    private static final CssMetaData<FrameNumberAxis, Paint> TEXTFILL_CSS_META_DATA =
-        new CssMetaData<FrameNumberAxis, Paint>("-fx-text-fill", StyleConverter.getPaintConverter()) {
-            @Override
-            public boolean isSettable(FrameNumberAxis frameNumberAxis) {
-                return !frameNumberAxis.textFill.isBound();
-            }
-            @Override
-            public StyleableProperty<Paint> getStyleableProperty(FrameNumberAxis frameNumberAxis) {
-                return (StyleableProperty<Paint>)frameNumberAxis.textFill;
+            public StyleableProperty<Font> getStyleableProperty(OldFrameNumberAxis oldFrameNumberAxis) {
+                return (StyleableProperty<Font>) oldFrameNumberAxis.font;
             }
         };
 
-    private static final CssMetaData<FrameNumberAxis, Number> TICKHSCALEFORGAP_CSS_META_DATA =
-        new CssMetaData<FrameNumberAxis, Number>("-tickhscaleforgap", StyleConverter.getSizeConverter()) {
+    private static final CssMetaData<OldFrameNumberAxis, Paint> TEXTFILL_CSS_META_DATA =
+        new CssMetaData<OldFrameNumberAxis, Paint>("-fx-text-fill", StyleConverter.getPaintConverter()) {
             @Override
-            public boolean isSettable(FrameNumberAxis frameNumberAxis) {
-                return !frameNumberAxis.tickHScaleForGap.isBound();
+            public boolean isSettable(OldFrameNumberAxis oldFrameNumberAxis) {
+                return !oldFrameNumberAxis.textFill.isBound();
+            }
+            @Override
+            public StyleableProperty<Paint> getStyleableProperty(OldFrameNumberAxis oldFrameNumberAxis) {
+                return (StyleableProperty<Paint>) oldFrameNumberAxis.textFill;
+            }
+        };
+
+    private static final CssMetaData<OldFrameNumberAxis, Number> TICKHSCALEFORGAP_CSS_META_DATA =
+        new CssMetaData<OldFrameNumberAxis, Number>("-tickhscaleforgap", StyleConverter.getSizeConverter()) {
+            @Override
+            public boolean isSettable(OldFrameNumberAxis oldFrameNumberAxis) {
+                return !oldFrameNumberAxis.tickHScaleForGap.isBound();
             }
 
             @Override
-            public StyleableProperty<Number> getStyleableProperty(FrameNumberAxis frameNumberAxis) {
-                return (StyleableProperty<Number>)frameNumberAxis.tickHScaleForGap;
+            public StyleableProperty<Number> getStyleableProperty(OldFrameNumberAxis oldFrameNumberAxis) {
+                return (StyleableProperty<Number>) oldFrameNumberAxis.tickHScaleForGap;
             }
         };
 
