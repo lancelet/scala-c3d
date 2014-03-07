@@ -1,5 +1,6 @@
 package c3d.viewer;
 
+import c3d.viewer.scene.control.FrameNumberAxis;
 import c3d.viewer.scene.control.OldFrameNumberAxis;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -17,7 +18,7 @@ public class TimelineTest extends Application {
         primaryStage.setTitle("Timeline Test");
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(50));
-        OldFrameNumberAxis fna = new OldFrameNumberAxis();
+        FrameNumberAxis fna = new FrameNumberAxis();
         root.setStyle("-fx-background-color: black;");
         root.setBottom(fna);
         primaryStage.setScene(new Scene(root, 800, 200));

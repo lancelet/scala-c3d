@@ -8,6 +8,7 @@ import javafx.scene.paint.{Paint, Color}
 import javafx.geometry.Insets
 import c3d.viewer.css._
 
+
 final class FrameNumberAxis extends Control {
   import FrameNumberAxis._
 
@@ -37,6 +38,8 @@ final class FrameNumberAxis extends Control {
   def labelInsetsProperty: ObjectProperty[Insets] = labelInsets
   def setLabelInsets(i: Insets): Unit = labelInsets.set(i)
   def getLabelInsets: Insets = labelInsets.get
+
+  override protected def getUserAgentStylesheet = getClass.getResource("framenumberaxis.css").toString
 
   private def initialize() {
     getStyleClass.setAll(DefaultStyleClass)
